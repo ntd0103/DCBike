@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DC Car Booking - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #000066 0%, #000044 100%);
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #000066 0%, #000044 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #000066 0%, #000044 100%);
+            border: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border: none;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            /* allow dropdowns inside tables to overflow (so menus are not clipped) */
+            overflow: visible;
+        }
+
+        /* Ensure dropdown menus render above table/card content */
+        .dropdown-menu {
+            z-index: 1200;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #000066 0%, #000044 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .pending-requests {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #8b4513;
+        }
+        
+        .approved-drivers {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2c3e50;
+        }
+        
+        .total-vouchers {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+            color: #8b4513;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar p-3">
+                <div class="text-center mb-4">
+                    <a href="http://localhost:3000/index.html#" class="text-white text-decoration-none" title="Trang chủ">
+                        <h4><i class="bi bi-house-door-fill me-2"></i>DC Admin</h4>
+                    </a>
+                </div>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link active" href="#dashboard" data-section="dashboard">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#driver-registrations" data-section="driver-registrations">
+                            <i class="bi bi-person-plus me-2"></i>Duyệt tài xế
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#" id="openDriversList">
+                            <i class="bi bi-people-fill me-2"></i>Danh sách tài xế
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#" id="openLockedList">
+                            <i class="bi bi-lock-fill me-2"></i>Tài khoản bị khoá
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#" id="openCustomersList">
+                            <i class="bi bi-person-lines-fill me-2"></i>Danh sách khách hàng
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#vouchers" data-section="vouchers">
+                            <i class="bi bi-gift me-2"></i>Quản lý voucher
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content p-4">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="content-section">
+                    <h2 class="mb-4">Dashboard</h2>
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card pending-requests">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-clock-history fs-1 mb-2"></i>
+                                    <h3 id="pending-count">0</h3>
+                                    <p class="mb-0">Đơn chờ duyệt</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card approved-drivers">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-check-circle fs-1 mb-2"></i>
+                                    <h3 id="approved-count">0</h3>
+                                    <p class="mb-0">Tài xế đã duyệt</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card total-vouchers">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-gift fs-1 mb-2"></i>
+                                    <h3 id="voucher-count">0</h3>
+                                    <p class="mb-0">Tổng voucher</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-graph-up fs-1 mb-2"></i>
+                                    <h3 id="total-revenue">0đ</h3>
+                                    <p class="mb-0">Doanh thu tháng</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trip History -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-map me-2"></i>Lịch sử chuyến đi</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Khách hàng</th>
+                                            <th>Tài xế</th>
+                                            <th>Điểm đón</th>
+                                            <th>Điểm đến</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Trạng thái</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="trips-table">
+                                        <tr><td colspan="9" class="text-center">Đang tải...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2" id="trips-pagination" style="min-height:38px;">
+                                <div class="text-muted small" id="trips-summary"></div>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-secondary" id="trips-prev">Trang trước</button>
+                                    <button class="btn btn-sm btn-outline-secondary" id="trips-next">Trang sau</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Driver Registrations Section -->
+                <div id="driver-registrations-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Đăng ký tài xế</h2>
+                        <div>
+                            <select class="form-select" id="status-filter" style="width: auto;">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="approved">Đã duyệt</option>
+                                <option value="rejected">Đã từ chối</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-list me-2"></i>Danh sách đăng ký</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Họ tên</th>
+                                            <th>Email</th>
+                                            <th>Số điện thoại</th>
+                                            <th>Số bằng lái</th>
+                                            <th>Trạng thái</th>
+                                            <th>Ngày đăng ký</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="driver-registrations-table">
+                                        <tr>
+                                            <td colspan="8" class="text-center">Đang tải...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drivers Section -->
+                <div id="drivers-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Danh sách tài xế</h2>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-people-fill me-
+                                2"></i>Danh sách tài xế</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Họ tên</th>
+                                            <th>Email</th>
+                                            <th>Số điện thoại</th>
+                                            <th>Trạng thái</th>
+                                            <th>Vai trò</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="drivers-table">
+                                        <tr><td colspan="8" class="text-center">Đang tải...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customers Section -->
+                <div id="customers-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Danh sách khách hàng</h2>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Danh sách khách hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Họ tên</th>
+                                            <th>Email</th>
+                                            <th>Số điện thoại</th>
+                                            <th>Trạng thái</th>
+                                            <th>Vai trò</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customers-table">
+                                        <tr><td colspan="8" class="text-center">Đang tải...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Locked Accounts Section -->
+                <div id="locked-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Tài khoản bị khoá</h2>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-lock-fill me-2"></i>Danh sách tài khoản đang bị khoá</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Họ tên</th>
+                                            <th>Email</th>
+                                            <th>Số điện thoại</th>
+                                            <th>Vai trò</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="locked-table">
+                                        <tr><td colspan="7" class="text-center">Đang tải...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vouchers Section -->
+                <div id="vouchers-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Quản lý voucher</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#voucherModal">
+                            <i class="bi bi-plus-circle me-2"></i>Tạo voucher mới
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-gift me-2"></i>Danh sách voucher</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã voucher</th>
+                                            <th>Tên voucher</th>
+                                            <th>Loại</th>
+                                            <th>Giá trị</th>
+                                            <th>Ngày bắt đầu</th>
+                                            <th>Ngày kết thúc</th>
+                                            <th>Trạng thái</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vouchers-table">
+                                        <tr>
+                                            <td colspan="8" class="text-center">Đang tải...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Trip Detail Modal -->
+    <div class="modal fade" id="tripModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết chuyến đi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="tripModalBody">
+                    <!-- Trip details here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Offcanvas: Drivers List -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="driversOffcanvas" aria-labelledby="driversOffcanvasLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="driversOffcanvasLabel">Danh sách tài xế</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div id="drivers-list-container">
+                    <div class="text-center text-muted">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offcanvas: Customers List -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="customersOffcanvas" aria-labelledby="customersOffcanvasLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="customersOffcanvasLabel">Danh sách khách hàng</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div id="customers-list-container">
+                    <div class="text-center text-muted">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+    
+    <!-- Driver Registration Detail Modal -->
+    <div class="modal fade" id="driverModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết đăng ký tài xế</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="driverModalBody">
+                    <!-- Driver details will be loaded here -->
+                </div>
+                <div class="modal-footer" id="driverModalFooter">
+                    <!-- Action buttons will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Detail Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="userModalBody">
+                    <!-- User details loaded here -->
+                </div>
+                <div class="modal-footer" id="userModalFooter">
+                    <!-- Actions: lock/unlock, change role -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Voucher Modal -->
+    <div class="modal fade" id="voucherModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tạo voucher mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                                <form id="voucherForm">
+                                    <input type="hidden" id="voucher-id" name="id" />
+                        <div class="mb-3">
+                            <label class="form-label">Mã voucher *</label>
+                            <input type="text" class="form-control" name="ma_khuyen_mai" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tên voucher *</label>
+                            <input type="text" class="form-control" name="ten_khuyen_mai" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" name="mo_ta" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Loại khuyến mãi *</label>
+                                <select class="form-select" name="loai_khuyen_mai" required>
+                                    <option value="phan_tram">Phần trăm (%)</option>
+                                    <option value="so_tien">Số tiền (VND)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Giá trị *</label>
+                                <input type="number" class="form-control" name="gia_tri" required min="0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Giá trị tối đa</label>
+                                <input type="number" class="form-control" name="gia_tri_toi_da" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Giá trị tối thiểu</label>
+                                <input type="number" class="form-control" name="gia_tri_toi_thieu" min="0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ngày bắt đầu *</label>
+                                <input type="date" class="form-control" name="ngay_bat_dau" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ngày kết thúc *</label>
+                                <input type="date" class="form-control" name="ngay_ket_thuc" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giới hạn sử dụng</label>
+                            <input type="number" class="form-control" name="gioi_han_su_dung" min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-select" name="trang_thai">
+                                <option value="hoat_dong">Hoạt động</option>
+                                <option value="tam_dung">Tạm dừng</option>
+                                <option value="het_han">Hết hạn</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="voucherSaveButton" onclick="createVoucher()">Tạo voucher</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+        
+        // Check if user is admin
+        if (userData) {
+            const user = JSON.parse(userData);
+            if (user.loai_tai_khoan !== 'admin') {
+                alert('Bạn không có quyền truy cập trang này!');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Navigation
+        document.querySelectorAll('[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = e.target.getAttribute('data-section');
+                showSection(section);
+                
+                // Update active nav
+                document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+                e.target.classList.add('active');
+            });
+        });
+
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.style.display = 'none';
+            });
+            
+            // Show selected section. support both ids like 'drivers-section' and legacy 'drivers-section'
+            const idWithSuffix = section + '-section';
+            const el = document.getElementById(idWithSuffix) || document.getElementById(section);
+            if (el) {
+                el.style.display = 'block';
+            } else {
+                console.warn('Requested section not found:', section, idWithSuffix);
+            }
+            
+            // Load section data
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'driver-registrations':
+                    loadDriverRegistrations();
+                    break;
+                case 'drivers':
+                    loadDriversSection();
+                    break;
+                case 'locked':
+                    loadLockedAccountsSection();
+                    break;
+                case 'customers':
+                    loadCustomersSection();
+                    break;
+                case 'vouchers':
+                    loadVouchers();
+                    break;
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/admin/dashboard', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('pending-count').textContent = data.pendingRegistrations || 0;
+                    document.getElementById('approved-count').textContent = data.approvedDrivers || 0;
+                    document.getElementById('voucher-count').textContent = data.totalVouchers || 0;
+                    document.getElementById('total-revenue').textContent = 
+                        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                        .format(data.monthlyRevenue || 0);
+                }
+                // Load trip history beneath stats
+                loadTripHistory(window.__tripsPage || 1);
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Load trip history (admin) with simple pagination
+        async function loadTripHistory(page = 1) {
+            const tbody = document.getElementById('trips-table');
+            const summary = document.getElementById('trips-summary');
+            const btnPrev = document.getElementById('trips-prev');
+            const btnNext = document.getElementById('trips-next');
+            window.__tripsPage = page;
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center"><div class="spinner-border" role="status"></div></td></tr>';
+            summary.textContent = '';
+            btnPrev.disabled = true; btnNext.disabled = true;
+            try {
+                const limit = 10;
+                const res = await fetch(`/api/admin/trips?page=${page}&limit=${limit}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Không thể tải lịch sử chuyến đi');
+                const json = await res.json();
+                const data = json.data || { trips: [], pagination: { page, total: 0, totalPages: 1 } };
+                const trips = data.trips || [];
+                if (trips.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Chưa có chuyến đi</td></tr>';
+                } else {
+                    tbody.innerHTML = trips.map(t => `
+                        <tr>
+                            <td>${t.id}</td>
+                            <td>${t.ten_khach_hang || t.khach_hang_id || ''}</td>
+                            <td>${t.ten_tai_xe || ''}</td>
+                            <td>${t.diem_don || ''}</td>
+                            <td>${t.diem_den || ''}</td>
+                            <td>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(t.tong_tien || 0)}</td>
+                            <td><span class="badge bg-${getStatusColor(t.trang_thai)}">${getStatusText(t.trang_thai)}</span></td>
+                            <td>${(t.created_at || t.thoi_gian_dat) ? new Date(t.created_at || t.thoi_gian_dat).toLocaleString('vi-VN') : ''}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="showTripDetail(${t.id})">Xem</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                const { page: cur, total, totalPages } = data.pagination || { page, total: trips.length, totalPages: 1 };
+                summary.textContent = `Trang ${cur}/${totalPages} • Tổng ${total} chuyến`;
+                btnPrev.disabled = cur <= 1;
+                btnNext.disabled = cur >= totalPages;
+                btnPrev.onclick = () => loadTripHistory(cur - 1);
+                btnNext.onclick = () => loadTripHistory(cur + 1);
+            } catch (e) {
+                console.error('loadTripHistory error:', e);
+                tbody.innerHTML = '<tr><td colspan="9" class="text-danger text-center">Lỗi khi tải lịch sử chuyến đi</td></tr>';
+            }
+        }
+
+        // Show trip detail modal
+        async function showTripDetail(id) {
+            try {
+                const res = await fetch(`/api/admin/trips/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('Không thể tải chi tiết chuyến đi');
+                const json = await res.json();
+                const t = json.data;
+                const body = document.getElementById('tripModalBody');
+                body.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ID chuyến:</strong> ${t.id}</p>
+                            <p><strong>Khách hàng:</strong> ${t.ten_khach_hang || t.khach_hang_id}</p>
+                            <p><strong>Tài xế:</strong> ${t.ten_tai_xe || ''}</p>
+                            <p><strong>Trạng thái:</strong> <span class="badge bg-${getStatusColor(t.trang_thai)}">${getStatusText(t.trang_thai)}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Điểm đón:</strong> ${t.diem_don || ''}</p>
+                            <p><strong>Điểm đến:</strong> ${t.diem_den || ''}</p>
+                            <p><strong>Tổng tiền:</strong> ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(t.tong_tien || 0)}</p>
+                            <p><strong>Thời gian đặt:</strong> ${(t.created_at || t.thoi_gian_dat) ? new Date(t.created_at || t.thoi_gian_dat).toLocaleString('vi-VN') : ''}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Thời gian đón:</strong> ${t.thoi_gian_don ? new Date(t.thoi_gian_don).toLocaleString('vi-VN') : '-'}</p>
+                            <p><strong>Bắt đầu:</strong> ${t.thoi_gian_bat_dau ? new Date(t.thoi_gian_bat_dau).toLocaleString('vi-VN') : '-'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Kết thúc:</strong> ${t.thoi_gian_ket_thuc ? new Date(t.thoi_gian_ket_thuc).toLocaleString('vi-VN') : '-'}</p>
+                            ${t.ly_do_huy ? `<p><strong>Lý do hủy:</strong> ${t.ly_do_huy}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                new bootstrap.Modal(document.getElementById('tripModal')).show();
+            } catch (e) {
+                console.error('showTripDetail error:', e);
+                alert('Lỗi khi tải chi tiết chuyến đi');
+            }
+        }
+
+        // Load driver registrations
+        async function loadDriverRegistrations() {
+            try {
+                const response = await fetch('/api/admin/driver-registrations', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Driver registrations data:', data); // Debug log
+                    displayDriverRegistrations(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading driver registrations:', error);
+            }
+        }
+
+        function displayDriverRegistrations(registrations) {
+            const tbody = document.getElementById('driver-registrations-table');
+            
+            if (registrations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">Không có đăng ký nào</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = registrations.map(reg => `
+                <tr>
+                    <td>${reg.id}</td>
+                    <td>${reg.ten}</td>
+                    <td>${reg.email}</td>
+                    <td>${reg.so_dien_thoai}</td>
+                    <td>${reg.so_bang_lai}</td>
+                    <td><span class="badge bg-${getStatusColor(reg.trang_thai)}">${getStatusText(reg.trang_thai)}</span></td>
+                    <td>${new Date(reg.created_at).toLocaleDateString('vi-VN')}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewDriverDetail(${reg.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        ${reg.trang_thai === 'pending' || reg.trang_thai === 'cho_duyet' ? `
+                            <button class="btn btn-sm btn-success ms-1" onclick="approveDriver(${reg.id})">
+                                <i class="bi bi-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger ms-1" onclick="rejectDriver(${reg.id})">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Normalize and map different status values (DB uses Vietnamese keys)
+        function getStatusColor(status) {
+            switch((status || '').toString()) {
+                case 'pending':
+                case 'cho_duyet':
+                    return 'warning';
+                case 'approved':
+                case 'da_duyet':
+                    return 'success';
+                case 'rejected':
+                case 'tu_choi':
+                    return 'danger';
+                case 'hoat_dong':
+                    return 'success';
+                case 'tam_khoa':
+                    return 'danger';
+                // Trip statuses
+                case 'cho_tai_xe':
+                    return 'info';
+                case 'da_nhan':
+                    return 'primary';
+                case 'dang_di':
+                    return 'warning';
+                case 'hoan_thanh':
+                    return 'success';
+                case 'huy_bo':
+                    return 'secondary';
+                default:
+                    return 'secondary';
+            }
+        }
+
+        function getStatusText(status) {
+            switch((status || '').toString()) {
+                case 'pending':
+                case 'cho_duyet':
+                    return 'Chờ duyệt';
+                case 'approved':
+                case 'da_duyet':
+                    return 'Đã duyệt';
+                case 'rejected':
+                case 'tu_choi':
+                    return 'Đã từ chối';
+                case 'hoat_dong':
+                    return 'Đang mở tài khoản';
+                case 'tam_khoa':
+                    return 'Đang khóa tài khoản';
+                // Trip statuses
+                case 'cho_tai_xe':
+                    return 'Chờ tài xế';
+                case 'da_nhan':
+                    return 'Đã nhận';
+                case 'dang_di':
+                    return 'Đang đi';
+                case 'hoan_thanh':
+                    return 'Hoàn thành';
+                case 'huy_bo':
+                    return 'Hủy bỏ';
+                default:
+                    return 'Không xác định';
+            }
+        }
+
+        async function viewDriverDetail(id) {
+            try {
+                const response = await fetch(`/api/admin/driver-registrations/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Driver detail response:', result); // Debug log
+                    showDriverModal(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading driver detail:', error);
+            }
+        }
+
+        function showDriverModal(driver) {
+            const modalBody = document.getElementById('driverModalBody');
+            const modalFooter = document.getElementById('driverModalFooter');
+            
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Họ tên:</strong> ${driver.ten}</p>
+                        <p><strong>Email:</strong> ${driver.email}</p>
+                        <p><strong>Số điện thoại:</strong> ${driver.so_dien_thoai}</p>
+                        <p><strong>Số bằng lái:</strong> ${driver.so_bang_lai}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Địa chỉ:</strong> ${driver.dia_chi}</p>
+                        <p><strong>Loại bằng lái:</strong> ${driver.loai_bang_lai}</p>
+                        <p><strong>Kinh nghiệm:</strong> ${driver.kinh_nghiem_lien_tuc} năm</p>
+                        <p><strong>Ngày đăng ký:</strong> ${new Date(driver.created_at).toLocaleDateString('vi-VN')}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <p><strong>Trạng thái:</strong> 
+                            <span class="badge bg-${getStatusColor(driver.trang_thai)}">
+                                ${getStatusText(driver.trang_thai)}
+                            </span>
+                        </p>
+                        ${driver.ghi_chu ? `<p><strong>Ghi chú:</strong> ${driver.ghi_chu}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            modalFooter.innerHTML = `
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                ${driver.trang_thai === 'cho_duyet' ? `
+                    <button type="button" class="btn btn-success" onclick="approveDriver(${driver.id})" data-bs-dismiss="modal">
+                        <i class="bi bi-check me-2"></i>Duyệt
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="rejectDriver(${driver.id})" data-bs-dismiss="modal">
+                        <i class="bi bi-x me-2"></i>Từ chối
+                    </button>
+                ` : ''}
+            `;
+            
+            new bootstrap.Modal(document.getElementById('driverModal')).show();
+        }
+
+        async function approveDriver(id) {
+            if (!confirm('Bạn có chắc chắn muốn duyệt đăng ký này?')) return;
+            
+            try {
+                console.log('Approving driver with ID:', id); // Debug log
+                const response = await fetch(`/api/admin/driver-registrations/${id}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Approve response:', response); // Debug log
+                if (response.ok) {
+                    alert('Đã duyệt đăng ký thành công!');
+                    loadDriverRegistrations();
+                    loadDashboard();
+                } else {
+                    const error = await response.json();
+                    console.error('Approve error response:', error); // Debug log
+                    alert('Lỗi: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error approving driver:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        async function rejectDriver(id) {
+            const reason = prompt('Nhập lý do từ chối:');
+            if (!reason) return;
+            
+            try {
+                console.log('Rejecting driver with ID:', id, 'Reason:', reason); // Debug log
+                const response = await fetch(`/api/admin/driver-registrations/${id}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ly_do_tu_choi: reason })
+                });
+                
+                console.log('Reject response:', response); // Debug log
+                if (response.ok) {
+                    alert('Đã từ chối đăng ký!');
+                    loadDriverRegistrations();
+                    loadDashboard();
+                } else {
+                    const error = await response.json();
+                    console.error('Reject error response:', error); // Debug log
+                    alert('Lỗi: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error rejecting driver:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        // Load vouchers
+        async function loadVouchers() {
+            try {
+                const response = await fetch('/api/admin/vouchers', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const json = await response.json();
+                    // API may return either:
+                    // { success: true, data: [ ... ] }
+                    // or { success: true, data: { promotions: [...], pagination: {...} } }
+                    let vouchers = [];
+                    if (json && json.data) {
+                        if (Array.isArray(json.data)) {
+                            vouchers = json.data;
+                        } else if (json.data.promotions && Array.isArray(json.data.promotions)) {
+                            vouchers = json.data.promotions;
+                        } else if (Array.isArray(json.data.promotions)) {
+                            vouchers = json.data.promotions;
+                        } else {
+                            // Fallback: try to treat data as array-like
+                            vouchers = Array.isArray(json.data) ? json.data : [];
+                        }
+                    }
+                    displayVouchers(vouchers);
+                }
+            } catch (error) {
+                console.error('Error loading vouchers:', error);
+            }
+        }
+
+        function displayVouchers(vouchers) {
+            const tbody = document.getElementById('vouchers-table');
+            
+            if (vouchers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">Không có voucher nào</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = vouchers.map(voucher => `
+                <tr>
+                    <td><code>${voucher.ma_khuyen_mai}</code></td>
+                    <td>${voucher.ten_khuyen_mai}</td>
+                    <td>
+                        <span class="badge bg-info">
+                            ${voucher.loai_khuyen_mai === 'phan_tram' ? 'Phần trăm' : 'Số tiền'}
+                        </span>
+                    </td>
+                    <td>
+                        ${voucher.loai_khuyen_mai === 'phan_tram' 
+                            ? voucher.gia_tri + '%' 
+                            : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(voucher.gia_tri)
+                        }
+                    </td>
+                    <td>${new Date(voucher.ngay_bat_dau).toLocaleDateString('vi-VN')}</td>
+                    <td>${new Date(voucher.ngay_ket_thuc).toLocaleDateString('vi-VN')}</td>
+                    <td>
+                        <span class="badge bg-${voucher.trang_thai === 'hoat_dong' ? 'success' : 'secondary'}">
+                            ${voucher.trang_thai === 'hoat_dong' ? 'Hoạt động' : 'Tạm dừng'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editVoucher(${voucher.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger ms-1" onclick="deleteVoucher(${voucher.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function createVoucher() {
+            const form = document.getElementById('voucherForm');
+            const formData = new FormData(form);
+            const voucherData = Object.fromEntries(formData);
+            // If an id exists, perform update instead
+            const id = document.getElementById('voucher-id').value;
+            try {
+                if (id) {
+                    // update existing voucher
+                    const res = await fetch(`/api/admin/vouchers/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(voucherData)
+                    });
+
+                    if (res.ok) {
+                        alert('Cập nhật voucher thành công!');
+                        bootstrap.Modal.getInstance(document.getElementById('voucherModal')).hide();
+                        form.reset();
+                        document.getElementById('voucher-id').value = '';
+                        document.getElementById('voucherSaveButton').textContent = 'Tạo voucher';
+                        loadVouchers();
+                        loadDashboard();
+                    } else {
+                        const err = await res.json().catch(() => ({}));
+                        alert('Lỗi: ' + (err.message || 'Không thể cập nhật voucher'));
+                    }
+                } else {
+                    const response = await fetch('/api/admin/vouchers', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(voucherData)
+                    });
+
+                    if (response.ok) {
+                        alert('Tạo voucher thành công!');
+                        bootstrap.Modal.getInstance(document.getElementById('voucherModal')).hide();
+                        form.reset();
+                        loadVouchers();
+                        loadDashboard();
+                    } else {
+                        const error = await response.json();
+                        alert('Lỗi: ' + error.message);
+                    }
+                }
+            } catch (error) {
+                console.error('Error creating/updating voucher:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        async function deleteVoucher(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa voucher này?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/vouchers/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Đã xóa voucher!');
+                    loadVouchers();
+                    loadDashboard();
+                } else {
+                    const error = await response.json();
+                    alert('Lỗi: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error deleting voucher:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        // Edit voucher: load voucher data into modal and switch save to update
+        async function editVoucher(id) {
+            try {
+                const res = await fetch(`/api/admin/vouchers/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Không thể tải voucher');
+                const json = await res.json();
+                const v = json.data;
+
+                const form = document.getElementById('voucherForm');
+                form.elements['ma_khuyen_mai'].value = v.ma_khuyen_mai || '';
+                form.elements['ten_khuyen_mai'].value = v.ten_khuyen_mai || '';
+                form.elements['mo_ta'].value = v.mo_ta || '';
+                form.elements['loai_khuyen_mai'].value = v.loai_khuyen_mai || 'phan_tram';
+                form.elements['gia_tri'].value = v.gia_tri || '';
+                form.elements['gia_tri_toi_da'].value = v.gia_tri_toi_da || '';
+                form.elements['gia_tri_toi_thieu'].value = v.gia_tri_toi_thieu || '';
+                form.elements['ngay_bat_dau'].value = v.ngay_bat_dau ? new Date(v.ngay_bat_dau).toISOString().slice(0,10) : '';
+                form.elements['ngay_ket_thuc'].value = v.ngay_ket_thuc ? new Date(v.ngay_ket_thuc).toISOString().slice(0,10) : '';
+                form.elements['gioi_han_su_dung'].value = v.gioi_han_su_dung || '';
+                if (form.elements['trang_thai']) form.elements['trang_thai'].value = v.trang_thai || 'hoat_dong';
+                // set trang_thai control by adding a hidden or using select? We'll reuse existing field by creating a temporary select if needed
+                document.getElementById('voucher-id').value = v.id;
+                document.getElementById('voucherSaveButton').textContent = 'Cập nhật';
+                document.getElementById('voucherModal').querySelector('.modal-title').textContent = 'Chỉnh sửa voucher';
+                new bootstrap.Modal(document.getElementById('voucherModal')).show();
+            } catch (err) {
+                console.error('editVoucher error:', err);
+                alert('Lỗi khi tải voucher');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        }
+
+        // Filter driver registrations
+        document.getElementById('status-filter').addEventListener('change', function() {
+            // Implement filtering logic if needed
+            loadDriverRegistrations();
+        });
+
+        // Initialize dashboard
+        loadDashboard();
+
+        // Offcanvas handlers for drivers/customers
+        // Sidebar links: show main-section instead of offcanvas
+        document.getElementById('openDriversList').addEventListener('click', function(e) {
+            e.preventDefault();
+            // update active nav - use currentTarget to avoid inner-icon click issues
+            document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            showSection('drivers');
+        });
+
+        document.getElementById('openCustomersList').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            showSection('customers');
+        });
+
+        document.getElementById('openLockedList').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            showSection('locked');
+        });
+
+        async function loadDriversList() {
+            const container = document.getElementById('drivers-list-container');
+            container.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+            try {
+                const res = await fetch('/api/admin/users?role=tai_xe', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('Lỗi khi tải danh sách');
+                const json = await res.json();
+                const users = json.data && Array.isArray(json.data.users) ? json.data.users : (json.data || []);
+                if (!users || users.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted">Không có tài xế</div>';
+                    return;
+                }
+                container.innerHTML = '<ul class="list-group"></ul>';
+                const list = container.querySelector('.list-group');
+                users.forEach(u => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `<div>
+                        <strong>${u.ten || u.email}</strong><br><small class="text-muted">${u.email || ''} • ${u.so_dien_thoai || ''}</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="viewUser(${u.id})">Xem</button>
+                    </div>`;
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                console.error('Load drivers error:', err);
+                container.innerHTML = '<div class="text-danger">Lỗi khi tải danh sách tài xế</div>';
+            }
+        }
+
+        async function loadCustomersList() {
+            const container = document.getElementById('customers-list-container');
+            container.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+            try {
+                // request all customers including locked ones
+                const res = await fetch('/api/admin/users?role=khach_hang&status=all', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('Lỗi khi tải danh sách');
+                const json = await res.json();
+                const users = json.data && Array.isArray(json.data.users) ? json.data.users : (json.data || []);
+                if (!users || users.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted">Không có khách hàng</div>';
+                    return;
+                }
+                container.innerHTML = '<ul class="list-group"></ul>';
+                const list = container.querySelector('.list-group');
+                users.forEach(u => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `<div>
+                        <strong>${u.ten || u.email}</strong><br><small class="text-muted">${u.email || ''} • ${u.so_dien_thoai || ''}</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="viewUser(${u.id})">Xem</button>
+                    </div>`;
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                console.error('Load customers error:', err);
+                container.innerHTML = '<div class="text-danger">Lỗi khi tải danh sách khách hàng</div>';
+            }
+        }
+
+        // Load drivers into the main drivers-section table
+        async function loadDriversSection() {
+            const tbody = document.getElementById('drivers-table');
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center"><div class="spinner-border" role="status"></div></td></tr>';
+            try {
+                // request all drivers (including locked) so they remain visible
+                const res = await fetch('/api/admin/users?role=tai_xe&status=all', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('Lỗi khi tải danh sách tài xế');
+                const json = await res.json();
+                const users = json.data && Array.isArray(json.data.users) ? json.data.users : (json.data || []);
+                if (!users || users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Không có tài xế</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(u => `
+                    <tr data-user-id="${u.id}">
+                        <td>${u.id}</td>
+                        <td>${u.ten || ''}</td>
+                        <td>${u.email || ''}</td>
+                        <td>${u.so_dien_thoai || ''}</td>
+                        <td class="user-status-cell"><span class="badge bg-${getStatusColor(u.trang_thai)}">${getStatusText(u.trang_thai)}</span></td>
+                        <td>${u.loai_tai_khoan || ''}</td>
+                        <td>${new Date(u.created_at).toLocaleDateString('vi-VN')}</td>
+                        <td class="d-flex align-items-center gap-2">
+                            <button class="btn btn-sm btn-info" onclick="viewUser(${u.id})"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="lockUserAction(${u.id}, ${u.trang_thai === 'hoat_dong'})" ${u.trang_thai === 'hoat_dong' ? '' : 'disabled'}>Khóa</button>
+                            <div class="input-group input-group-sm ms-2" style="width: 200px;">
+                                <select class="form-select" id="role-select-${u.id}">
+                                    <option value="tai_xe" ${u.loai_tai_khoan === 'tai_xe' ? 'selected' : ''}>Tài xế</option>
+                                    <option value="khach_hang" ${u.loai_tai_khoan === 'khach_hang' ? 'selected' : ''}>Khách hàng</option>
+                                    <option value="admin" ${u.loai_tai_khoan === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                                <button class="btn btn-outline-secondary" type="button" onclick="changeUserRoleActionFromSelect(${u.id})">Cập nhật</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Load drivers section error:', err);
+                tbody.innerHTML = '<tr><td colspan="8" class="text-danger text-center">Lỗi khi tải danh sách</td></tr>';
+            }
+        }
+
+        // Load customers into the main customers-section table
+    async function loadCustomersSection() {
+            const tbody = document.getElementById('customers-table');
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border" role="status"></div></td></tr>';
+            try {
+                const res = await fetch('/api/admin/users?role=khach_hang', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('Lỗi khi tải danh sách khách hàng');
+                const json = await res.json();
+                const users = json.data && Array.isArray(json.data.users) ? json.data.users : (json.data || []);
+                if (!users || users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Không có khách hàng</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(u => `
+                    <tr data-user-id="${u.id}">
+                        <td>${u.id}</td>
+                        <td>${u.ten || ''}</td>
+                        <td>${u.email || ''}</td>
+                        <td>${u.so_dien_thoai || ''}</td>
+                        <td class="user-status-cell"><span class="badge bg-${getStatusColor(u.trang_thai)}">${getStatusText(u.trang_thai)}</span></td>
+                        <td>${u.loai_tai_khoan || ''}</td>
+                        <td>${new Date(u.created_at).toLocaleDateString('vi-VN')}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewUser(${u.id})"><i class="bi bi-eye"></i></button>
+                            ${u.trang_thai === 'hoat_dong' ? `<button class="btn btn-sm btn-danger ms-1" onclick="lockUserAction(${u.id}, true)">Khóa</button>` : ''}
+                            <div class="btn-group ms-1">
+                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">Role</button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="changeUserRoleAction(${u.id}, 'tai_xe')">Tài xế</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="changeUserRoleAction(${u.id}, 'khach_hang')">Khách hàng</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="changeUserRoleAction(${u.id}, 'admin')">Admin</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Load customers section error:', err);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-danger text-center">Lỗi khi tải danh sách</td></tr>';
+            }
+        }
+
+        // Load locked accounts
+        async function loadLockedAccountsSection() {
+            const tbody = document.getElementById('locked-table');
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border" role="status"></div></td></tr>';
+            try {
+                // request only locked users (DB uses 'tam_khoa' for nguoi_dung.trang_thai)
+                const res = await fetch('/api/admin/users?status=tam_khoa', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('Lỗi khi tải danh sách tài khoản bị khoá');
+                const json = await res.json();
+                console.log('loadLockedAccountsSection response:', json);
+                const users = json.data && Array.isArray(json.data.users) ? json.data.users : (json.data || []);
+                if (!users || users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Không có tài khoản bị khoá</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(u => `
+                    <tr data-user-id="${u.id}">
+                        <td>${u.id}</td>
+                        <td>${u.ten || ''}</td>
+                        <td>${u.email || ''}</td>
+                        <td>${u.so_dien_thoai || ''}</td>
+                        <td class="user-status-cell"><span class="badge bg-${getStatusColor(u.trang_thai)}">${getStatusText(u.trang_thai)}</span></td>
+                        <td>${u.loai_tai_khoan || ''}</td>
+                        <td>${new Date(u.created_at).toLocaleDateString('vi-VN')}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewUser(${u.id})"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-sm btn-success ms-1" onclick="lockUserAction(${u.id}, ${u.trang_thai === 'hoat_dong'})">Mở</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Load locked accounts error:', err);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-danger text-center">Lỗi khi tải danh sách</td></tr>';
+            }
+        }
+
+        // wire refresh button
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('refreshLockedBtn');
+            if (btn) btn.addEventListener('click', () => loadLockedAccountsSection());
+        });
+
+        // Lock/unlock action from main section
+        async function lockUserAction(userId, currentlyActive) {
+            const shouldLock = currentlyActive; // if active -> lock
+            if (shouldLock && !confirm('Bạn có chắc chắn muốn khóa tài khoản này? (Tài khoản sẽ bị đổi về vai trò Khách hàng và không thể đăng ký tài xế nữa)')) return;
+            try {
+                // If we're locking, first force the user's role back to 'khach_hang' so they cannot be promoted to driver
+                if (shouldLock) {
+                    const roleRes = await fetch(`/api/admin/users/${userId}/role`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: 'khach_hang' })
+                    });
+                    const roleJson = await roleRes.json();
+                    if (!roleRes.ok) {
+                        throw new Error(roleJson.message || 'Lỗi khi thay đổi vai trò');
+                    }
+                }
+
+                // Now call lock/unlock endpoint
+                const res = await fetch(`/api/admin/users/${userId}/lock`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lock: shouldLock })
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Lỗi khi thay đổi trạng thái');
+
+                // Update UI immediately: modal badge and table row buttons
+                const newStatus = shouldLock ? 'tam_khoa' : 'hoat_dong';
+                try { updateUserRowStatus(userId, newStatus); } catch(e) { console.warn('Failed to update row status UI', e); }
+                try {
+                    const modalBadge = document.querySelector('#userModalBody .badge');
+                    if (modalBadge) {
+                        modalBadge.className = 'badge bg-' + getStatusColor(newStatus);
+                        modalBadge.textContent = getStatusText(newStatus);
+                    }
+                } catch(e) { /* ignore */ }
+
+                // Inform admin and refresh lists
+                alert(shouldLock ? 'Tài khoản đã bị khóa và đổi về vai trò Khách hàng.' : json.message || 'Đã thay đổi trạng thái tài khoản.');
+                // Ensure locked users are visible: refresh lists and open locked section if we just locked
+                loadDriversSection();
+                loadCustomersSection();
+                loadDashboard();
+                if (shouldLock) {
+                    // show locked section and refresh it
+                    showSection('locked');
+                    loadLockedAccountsSection();
+                } else {
+                    // if unlocking, refresh locked list too
+                    loadLockedAccountsSection();
+                }
+            } catch (err) {
+                console.error('lockUserAction error:', err);
+                alert('Lỗi: ' + (err.message || 'Không thể thay đổi trạng thái'));
+            }
+        }
+
+        // Update the row UI for a given userId to reflect new status
+        function updateUserRowStatus(userId, status) {
+            const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+            if (!row) return;
+
+            // Find lock/unlock buttons in the row
+            const lockBtn = row.querySelector('button[onclick^="lockUserAction"][class*="btn-danger"]');
+            const unlockBtn = row.querySelector('button[onclick^="lockUserAction"][class*="btn-success"]');
+            if (status === 'tam_khoa') {
+                if (lockBtn) lockBtn.setAttribute('disabled', '');
+                if (unlockBtn) unlockBtn.removeAttribute('disabled');
+            } else if (status === 'hoat_dong') {
+                if (lockBtn) lockBtn.removeAttribute('disabled');
+                if (unlockBtn) unlockBtn.setAttribute('disabled', '');
+            }
+
+            // If there's a status cell in the row, update it (defensive)
+            const statusCell = row.querySelector('.user-status-cell');
+            if (statusCell) {
+                statusCell.innerHTML = `<span class="badge bg-${getStatusColor(status)}">${getStatusText(status)}</span>`;
+            }
+        }
+
+        // Change role action from main section
+        async function changeUserRoleAction(userId, role) {
+            if (!confirm(`Bạn có chắc chắn muốn đổi role thành "${role}"?`)) return;
+            try {
+                const res = await fetch(`/api/admin/users/${userId}/role`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role })
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Lỗi khi thay đổi vai trò');
+                alert(json.message);
+                loadDriversSection();
+                loadCustomersSection();
+                loadDashboard();
+            } catch (err) {
+                console.error('changeUserRoleAction error:', err);
+                alert('Lỗi: ' + (err.message || 'Không thể thay đổi vai trò'));
+            }
+        }
+
+        // Helper: read selected role from inline select and call the change role action
+        function changeUserRoleActionFromSelect(userId) {
+            const sel = document.getElementById(`role-select-${userId}`);
+            if (!sel) return alert('Không tìm thấy control role');
+            const role = sel.value;
+            changeUserRoleAction(userId, role);
+        }
+
+        // View user details inline (modal). Hides offcanvas if open.
+        async function viewUser(userId) {
+            try {
+                // hide offcanvas if any
+                const driversOff = document.getElementById('driversOffcanvas');
+                const customersOff = document.getElementById('customersOffcanvas');
+                try { bootstrap.Offcanvas.getInstance(driversOff)?.hide(); } catch(e) {}
+                try { bootstrap.Offcanvas.getInstance(customersOff)?.hide(); } catch(e) {}
+
+                const res = await fetch(`/api/admin/users/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.message || 'Không thể tải thông tin người dùng');
+                }
+                const json = await res.json();
+                const u = json.data || json.user || json;
+
+                const body = document.getElementById('userModalBody');
+                const footer = document.getElementById('userModalFooter');
+                body.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Họ tên:</strong> ${u.ten || ''}</p>
+                            <p><strong>Email:</strong> ${u.email || ''}</p>
+                            <p><strong>Số điện thoại:</strong> ${u.so_dien_thoai || ''}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Vai trò:</strong> ${u.loai_tai_khoan || ''}</p>
+                            <p><strong>Ngày tạo:</strong> ${u.created_at ? new Date(u.created_at).toLocaleString('vi-VN') : ''}</p>
+                            <p><strong>Trạng thái:</strong> <span class="badge bg-${getStatusColor(u.trang_thai)}">${getStatusText(u.trang_thai)}</span></p>
+                        </div>
+                    </div>
+                `;
+
+                // Only show the lock button in the modal when the user is active.
+                // Unlocking should be done from the "Tài khoản bị khoá" section only.
+                footer.innerHTML = `
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    ${u.trang_thai === 'hoat_dong' ? `
+                        <button type="button" class="btn btn-danger" onclick="lockUserAction(${u.id}, true)">Khóa</button>
+                    ` : ''}
+                    <div class="input-group ms-2" style="width:220px;">
+                        <select id="modal-role-select-${u.id}" class="form-select">
+                            <option value="tai_xe" ${u.loai_tai_khoan === 'tai_xe' ? 'selected' : ''}>Tài xế</option>
+                            <option value="khach_hang" ${u.loai_tai_khoan === 'khach_hang' ? 'selected' : ''}>Khách hàng</option>
+                            <option value="admin" ${u.loai_tai_khoan === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" onclick="changeUserRoleAction(${u.id}, document.getElementById('modal-role-select-${u.id}').value)">Cập nhật</button>
+                    </div>
+                `;
+
+                new bootstrap.Modal(document.getElementById('userModal')).show();
+            } catch (err) {
+                console.error('viewUser error:', err);
+                alert('Lỗi: ' + (err.message || 'Không thể tải thông tin người dùng'));
+            }
+        }
+    </script>
+</body>
+</html>

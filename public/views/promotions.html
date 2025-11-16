@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khuyến mãi - DC Car Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-car me-2"></i>DC Car Booking
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Trang chủ</a>
+                    </li>
+                    <li class="nav-item" id="booking-nav">
+                        <a class="nav-link" href="booking.html">Đặt xe</a>
+                    </li>
+                    <li class="nav-item" id="trips-nav">
+                        <a class="nav-link" href="trips.html">Chuyến đi</a>
+                    </li>
+                    <li class="nav-item" id="drivers-nav">
+                        <a class="nav-link" href="drivers.html">Tài xế</a>
+                    </li>
+                    <li class="nav-item" id="promos-nav">
+                        <a class="nav-link active" href="promotions.html">Khuyến mãi</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown d-none" id="user-nav">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <span id="user-name"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="profile.html">Hồ sơ</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" id="auth-nav">
+                        <button id="auth-btn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#authModal">
+                            Đăng nhập
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-gradient-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h2><i class="fas fa-tags me-2"></i>Khuyến mãi đặc biệt</h2>
+                    <p class="lead mb-0">Tiết kiệm chi phí với các chương trình khuyến mãi hấp dẫn từ DC Car Booking</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <div class="promotion-stats">
+                        <div class="stat-item">
+                            <!-- Modals -->
+                            <!-- Auth Modal (copied from index.html so auth button works) -->
+                            <div class="modal fade" id="authModal" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="authModalTitle">Đăng nhập</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Login Form -->
+                                            <form id="login-form" class="auth-form">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Email hoặc Số điện thoại</label>
+                                                    <input type="text" class="form-control" id="login-identifier" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Mật khẩu</label>
+                                                    <input type="password" class="form-control" id="login-password" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                                            </form>
+
+                                            <!-- Register Form -->
+                                            <form id="register-form" class="auth-form d-none">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Họ và tên</label>
+                                                    <input type="text" class="form-control" id="register-name" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Vai trò</label>
+                                                    <select class="form-select" id="register-role" required>
+                                                        <option value="khach_hang">Người dùng</option>
+                                                        <option value="tai_xe">Tài xế</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Email</label>
+                                                    <input type="email" class="form-control" id="register-email" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Số điện thoại</label>
+                                                    <input type="tel" class="form-control" id="register-phone" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Mật khẩu</label>
+                                                    <input type="password" class="form-control" id="register-password" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Xác nhận mật khẩu</label>
+                                                    <input type="password" class="form-control" id="register-confirm-password" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <p class="text-center w-100">
+                                                <span id="auth-switch-text">Chưa có tài khoản?</span>
+                                                <a href="#" id="auth-switch-link" onclick="toggleAuthForm()">Đăng ký ngay</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Scripts -->
+                            <small>Ưu đãi hiện tại</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Filter Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Loại khuyến mãi</label>
+                        <select class="form-select" id="promotion-type-filter">
+                            <option value="">Tất cả</option>
+                            <option value="giam_gia_theo_phan_tram">Giảm theo %</option>
+                            <option value="giam_gia_co_dinh">Giảm cố định</option>
+                            <option value="mien_phi_dich_vu">Miễn phí dịch vụ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" id="status-filter">
+                            <option value="">Tất cả</option>
+                            <option value="active">Đang diễn ra</option>
+                            <option value="upcoming">Sắp diễn ra</option>
+                            <option value="expired">Đã hết hạn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tìm kiếm</label>
+                        <input type="text" class="form-control" id="search-input" 
+                               placeholder="Tìm theo tên hoặc mã khuyến mãi">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary w-100" onclick="applyFilters()">
+                            <i class="fas fa-filter me-2"></i>Lọc
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Promotions -->
+        <div class="mb-5">
+            <h4 class="mb-4"><i class="fas fa-fire text-danger me-2"></i>Khuyến mãi nổi bật</h4>
+            <div class="row" id="featured-promotions">
+                <!-- Featured promotions will be loaded here -->
+            </div>
+        </div>
+
+        <!-- All Promotions -->
+        <div class="mb-4">
+            <h4><i class="fas fa-list me-2"></i>Tất cả khuyến mãi</h4>
+        </div>
+
+        <div id="promotions-container">
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Đang tải danh sách khuyến mãi...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Promotions pagination" class="mt-4">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Promotion Detail Modal -->
+    <div class="modal fade" id="promotionDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết khuyến mãi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="promotion-detail-content">
+                    <!-- Promotion details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="use-promotion-btn">
+                        <i class="fas fa-car me-2"></i>Đặt xe ngay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPromotions();
+            loadFeaturedPromotions();
+            
+            // Setup search on Enter key
+            document.getElementById('search-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    applyFilters();
+                }
+            });
+        });
+
+        // Load promotions from public API endpoint. The server exposes
+        // GET /api/promotions/active for public consumers.
+        async function loadPromotions() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/promotions/all`);
+                const result = await response.json();
+
+                if (result.success) {
+                    // result.data is expected to be an array of promotions
+                    let promotions = result.data || [];
+
+                    // Apply client-side filters (type, status, search)
+                    if (currentFilters && Object.keys(currentFilters).length > 0) {
+                        promotions = promotions.filter(promotion => {
+                            // Type filter
+                            if (currentFilters.type && promotion.loai_khuyen_mai !== currentFilters.type) return false;
+
+                            // Search filter (name or code)
+                            if (currentFilters.search) {
+                                const q = currentFilters.search.toLowerCase();
+                                const name = (promotion.ten_khuyen_mai || '').toLowerCase();
+                                const code = (promotion.ma_khuyen_mai || '').toLowerCase();
+                                if (!name.includes(q) && !code.includes(q)) return false;
+                            }
+
+                            // Status filter: use getPromotionStatus helper to compute current status
+                            if (currentFilters.status) {
+                                const s = getPromotionStatus(promotion).status;
+                                if (s !== currentFilters.status) return false;
+                            }
+
+                            return true;
+                        });
+                    }
+
+                    displayPromotions(promotions);
+                    // No server-side pagination for public endpoint; clear pagination
+                    document.getElementById('pagination').innerHTML = '';
+                } else {
+                    throw new Error(result.message || 'Không thể tải khuyến mãi');
+                }
+            } catch (error) {
+                console.error('Load promotions error:', error);
+                // Fallback to demo data
+                displayMockPromotions();
+            }
+        }
+
+        // Featured promotions: reuse active promotions and pick top 2 by value
+        async function loadFeaturedPromotions() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/promotions/all`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const promotions = result.data || [];
+                    // Pick up to 2 promotions with highest gia_tri (fallback)
+                    const featured = promotions.slice().sort((a, b) => (b.gia_tri || 0) - (a.gia_tri || 0)).slice(0, 2);
+                    displayFeaturedPromotions(featured);
+                } else {
+                    throw new Error(result.message || 'Không thể tải khuyến mãi nổi bật');
+                }
+            } catch (error) {
+                console.error('Load featured promotions error:', error);
+                // Fallback to demo featured promotions
+                displayMockFeaturedPromotions();
+            }
+        }
+
+        function displayMockPromotions() {
+            const mockPromotions = [
+                {
+                    id: 1,
+                    ten_khuyen_mai: 'Giảm 20% cho khách hàng mới',
+                    ma_khuyen_mai: 'NEW20',
+                    mo_ta: 'Ưu đãi đặc biệt dành cho khách hàng lần đầu sử dụng dịch vụ',
+                    loai_khuyen_mai: 'giam_gia_theo_phan_tram',
+                    gia_tri: 20,
+                    gia_tri_toi_da: 100000,
+                    gia_tri_don_hang_toi_thieu: 150000,
+                    ngay_bat_dau: '2024-10-01',
+                    ngay_ket_thuc: '2024-12-31',
+                    trang_thai: 'active'
+                },
+                {
+                    id: 2,
+                    ten_khuyen_mai: 'Giảm 50,000đ cho chuyến dài',
+                    ma_khuyen_mai: 'LONG50',
+                    mo_ta: 'Giảm 50,000đ cho các chuyến đi trên 50km',
+                    loai_khuyen_mai: 'giam_gia_co_dinh',
+                    gia_tri: 50000,
+                    gia_tri_don_hang_toi_thieu: 200000,
+                    ngay_bat_dau: '2024-10-01',
+                    ngay_ket_thuc: '2024-11-30',
+                    trang_thai: 'active'
+                },
+                {
+                    id: 3,
+                    ten_khuyen_mai: 'Miễn phí nước uống',
+                    ma_khuyen_mai: 'FREEWATER',
+                    mo_ta: 'Miễn phí nước uống cho tất cả chuyến đi',
+                    loai_khuyen_mai: 'mien_phi_dich_vu',
+                    gia_tri: 0,
+                    ngay_bat_dau: '2024-10-01',
+                    ngay_ket_thuc: '2024-10-31',
+                    trang_thai: 'active'
+                }
+            ];
+
+            displayPromotions(mockPromotions);
+            setupPagination({ currentPage: 1, totalPages: 1, total: mockPromotions.length });
+        }
+
+        function displayMockFeaturedPromotions() {
+            const featuredPromotions = [
+                {
+                    id: 1,
+                    ten_khuyen_mai: 'Giảm 20% cho khách hàng mới',
+                    ma_khuyen_mai: 'NEW20',
+                    mo_ta: 'Ưu đãi đặc biệt dành cho khách hàng lần đầu sử dụng dịch vụ',
+                    gia_tri: 20,
+                    loai_khuyen_mai: 'giam_gia_theo_phan_tram'
+                },
+                {
+                    id: 4,
+                    ten_khuyen_mai: 'Ưu đãi cuối tuần',
+                    ma_khuyen_mai: 'WEEKEND30',
+                    mo_ta: 'Giảm 30% cho tất cả chuyến đi vào cuối tuần',
+                    gia_tri: 30,
+                    loai_khuyen_mai: 'giam_gia_theo_phan_tram'
+                }
+            ];
+
+            displayFeaturedPromotions(featuredPromotions);
+        }
+
+        function displayFeaturedPromotions(promotions) {
+            const container = document.getElementById('featured-promotions');
+            
+            if (promotions.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center text-muted">Không có khuyến mãi nổi bật</div>';
+                return;
+            }
+
+            let html = '';
+            promotions.forEach(promotion => {
+                html += `
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100 border-0 shadow-lg promotion-featured">
+                            <div class="card-body position-relative">
+                                <div class="ribbon ribbon-top-right">
+                                    <span class="bg-danger text-white px-3 py-1">HOT</span>
+                                </div>
+                                
+                                <div class="d-flex align-items-start">
+                                    <div class="promotion-icon me-3">
+                                        <i class="fas fa-gift fa-2x text-danger"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title text-danger mb-2">${promotion.ten_khuyen_mai}</h5>
+                                        <p class="card-text text-muted mb-3">${promotion.mo_ta}</p>
+                                        
+                                        <div class="promotion-details mb-3">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="promo-stat">
+                                                        <h4 class="text-primary mb-0">
+                                                            ${formatPromotionValue(promotion)}
+                                                        </h4>
+                                                        <small class="text-muted">Giảm giá</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="promo-code">
+                                                        <code class="bg-light px-2 py-1 rounded">${promotion.ma_khuyen_mai}</code>
+                                                        <br><small class="text-muted">Mã khuyến mãi</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewPromotionDetail(${promotion.id})">
+                                                Chi tiết
+                                            </button>
+                                            <button class="btn btn-danger btn-sm book-now-btn" onclick="usePromotion('${promotion.ma_khuyen_mai}')">
+                                                <i class="fas fa-car me-1"></i>Đặt xe ngay
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function displayPromotions(promotions) {
+            const container = document.getElementById('promotions-container');
+            
+            if (promotions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center">
+                        <div class="card shadow-sm">
+                            <div class="card-body py-5">
+                                <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                                <h5>Không tìm thấy khuyến mãi nào</h5>
+                                <p class="text-muted">Hãy thử thay đổi bộ lọc hoặc quay lại sau</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="row">';
+            promotions.forEach(promotion => {
+                const statusInfo = getPromotionStatus(promotion);
+                const isExpired = statusInfo.status === 'expired';
+
+                html += `
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100 promotion-card ${isExpired ? 'promotion-expired' : ''}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h6 class="card-title mb-0">${promotion.ten_khuyen_mai}</h6>
+                                    <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
+                                </div>
+                                
+                                <p class="card-text text-muted mb-3">${promotion.mo_ta}</p>
+                                
+                                <div class="promotion-value mb-3">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <h5 class="text-primary mb-0">
+                                                ${formatPromotionValue(promotion)}
+                                            </h5>
+                                            <small class="text-muted">${getPromotionTypeText(promotion.loai_khuyen_mai)}</small>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <code class="promo-code">${promotion.ma_khuyen_mai}</code>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                ${promotion.gia_tri_don_hang_toi_thieu ? `
+                                    <div class="requirement mb-3">
+                                        <small class="text-info">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Đơn hàng tối thiểu: ${new Intl.NumberFormat('vi-VN').format(promotion.gia_tri_don_hang_toi_thieu)} VND
+                                        </small>
+                                    </div>
+                                ` : ''}
+
+                                <div class="promotion-period mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        ${formatDate(promotion.ngay_bat_dau)} - ${formatDate(promotion.ngay_ket_thuc)}
+                                    </small>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary btn-sm flex-fill" 
+                                            onclick="viewPromotionDetail(${promotion.id})">
+                                        <i class="fas fa-eye me-1"></i>Chi tiết
+                                    </button>
+                                    ${!isExpired ? `
+                                        <button class="btn btn-primary btn-sm book-now-btn" 
+                                                onclick="usePromotion('${promotion.ma_khuyen_mai}')">
+                                            <i class="fas fa-car me-1"></i>Dùng ngay
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        function formatPromotionValue(promotion) {
+            switch (promotion.loai_khuyen_mai) {
+                case 'giam_gia_theo_phan_tram':
+                    return `${promotion.gia_tri}%`;
+                case 'giam_gia_co_dinh':
+                    return `${new Intl.NumberFormat('vi-VN').format(promotion.gia_tri)} VND`;
+                case 'mien_phi_dich_vu':
+                    return 'Miễn phí';
+                default:
+                    return promotion.gia_tri;
+            }
+        }
+
+        function getPromotionTypeText(type) {
+            switch (type) {
+                case 'giam_gia_theo_phan_tram': return 'Giảm theo %';
+                case 'giam_gia_co_dinh': return 'Giảm cố định';
+                case 'mien_phi_dich_vu': return 'Miễn phí dịch vụ';
+                default: return type;
+            }
+        }
+
+        function getPromotionStatus(promotion) {
+            const now = new Date();
+            const startDate = new Date(promotion.ngay_bat_dau);
+            const endDate = new Date(promotion.ngay_ket_thuc);
+
+            if (now < startDate) {
+                return { status: 'upcoming', text: 'Sắp diễn ra', class: 'bg-info text-white' };
+            } else if (now > endDate) {
+                return { status: 'expired', text: 'Đã hết hạn', class: 'bg-secondary text-white' };
+            } else {
+                return { status: 'active', text: 'Đang diễn ra', class: 'bg-success text-white' };
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        function setupPagination(pagination) {
+            totalPages = pagination.totalPages;
+            currentPage = pagination.currentPage;
+            
+            const paginationContainer = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // Previous button
+            html += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadPromotions(${currentPage - 1})">Trước</a>
+                </li>
+            `;
+
+            // Page numbers
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadPromotions(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next button
+            html += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadPromotions(${currentPage + 1})">Sau</a>
+                </li>
+            `;
+
+            paginationContainer.innerHTML = html;
+        }
+
+        function applyFilters() {
+            currentFilters = {
+                type: document.getElementById('promotion-type-filter').value,
+                status: document.getElementById('status-filter').value,
+                search: document.getElementById('search-input').value.trim()
+            };
+
+            // Remove empty filters
+            Object.keys(currentFilters).forEach(key => {
+                if (!currentFilters[key]) {
+                    delete currentFilters[key];
+                }
+            });
+
+            loadPromotions();
+        }
+
+        function viewPromotionDetail(promotionId) {
+            // Mock promotion detail
+            const promotionDetail = {
+                id: promotionId,
+                ten_khuyen_mai: 'Giảm 20% cho khách hàng mới',
+                ma_khuyen_mai: 'NEW20',
+                mo_ta: 'Ưu đãi đặc biệt dành cho khách hàng lần đầu sử dụng dịch vụ DC Car Booking. Áp dụng cho tất cả các loại xe và không giới hạn quãng đường.',
+                loai_khuyen_mai: 'giam_gia_theo_phan_tram',
+                gia_tri: 20,
+                gia_tri_toi_da: 100000,
+                gia_tri_don_hang_toi_thieu: 150000,
+                ngay_bat_dau: '2024-10-01',
+                ngay_ket_thuc: '2024-12-31',
+                dieu_kien: [
+                    'Áp dụng cho khách hàng mới đăng ký tài khoản',
+                    'Chỉ sử dụng được 1 lần cho mỗi tài khoản',
+                    'Không áp dụng cùng với các khuyến mãi khác',
+                    'Giá trị đơn hàng tối thiểu 150,000 VND'
+                ]
+            };
+
+            displayPromotionDetail(promotionDetail);
+            const modal = new bootstrap.Modal(document.getElementById('promotionDetailModal'));
+            modal.show();
+        }
+
+        function displayPromotionDetail(promotion) {
+            const statusInfo = getPromotionStatus(promotion);
+            
+            const content = `
+                <div class="promotion-detail">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-gift fa-3x text-primary mb-3"></i>
+                        <h4>${promotion.ten_khuyen_mai}</h4>
+                        <span class="badge ${statusInfo.class} fs-6">${statusInfo.text}</span>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="promo-info-card p-3 bg-light rounded">
+                                <h6><i class="fas fa-percentage text-primary me-2"></i>Giá trị ưu đãi</h6>
+                                <h4 class="text-primary">${formatPromotionValue(promotion)}</h4>
+                                ${promotion.gia_tri_toi_da ? `<small class="text-muted">Tối đa: ${new Intl.NumberFormat('vi-VN').format(promotion.gia_tri_toi_da)} VND</small>` : ''}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="promo-info-card p-3 bg-light rounded">
+                                <h6><i class="fas fa-code text-success me-2"></i>Mã khuyến mãi</h6>
+                                <h4 class="text-success">${promotion.ma_khuyen_mai}</h4>
+                                <button class="btn btn-sm btn-outline-success" onclick="copyPromoCode('${promotion.ma_khuyen_mai}')">
+                                    <i class="fas fa-copy me-1"></i>Sao chép
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6><i class="fas fa-info-circle text-info me-2"></i>Mô tả chi tiết</h6>
+                        <p class="text-muted">${promotion.mo_ta}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6><i class="fas fa-calendar text-warning me-2"></i>Thời gian áp dụng</h6>
+                        <p class="mb-0">
+                            <strong>Từ:</strong> ${formatDate(promotion.ngay_bat_dau)}<br>
+                            <strong>Đến:</strong> ${formatDate(promotion.ngay_ket_thuc)}
+                        </p>
+                    </div>
+
+                    ${promotion.dieu_kien ? `
+                        <div class="mb-4">
+                            <h6><i class="fas fa-list-check text-danger me-2"></i>Điều kiện áp dụng</h6>
+                            <ul class="list-unstyled">
+                                ${promotion.dieu_kien.map(condition => `
+                                    <li class="mb-2">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        ${condition}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-phone me-1"></i>
+                            Liên hệ hotline <strong>1900 1234</strong> nếu cần hỗ trợ
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('promotion-detail-content').innerHTML = content;
+            document.getElementById('use-promotion-btn').onclick = () => usePromotion(promotion.ma_khuyen_mai);
+        }
+
+        function copyPromoCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showAlert('success', `Đã sao chép mã ${code} vào clipboard`);
+            }).catch(() => {
+                showAlert('error', 'Không thể sao chép mã khuyến mãi');
+            });
+        }
+
+        function usePromotion(promoCode) {
+            // Close modal if open
+            const modal = bootstrap.Modal.getInstance(document.getElementById('promotionDetailModal'));
+            if (modal) modal.hide();
+            
+            // Redirect to booking page with promo code
+            window.location.href = `booking.html?promo=${promoCode}`;
+        }
+    </script>
+
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #000066 0%, #000044 100%);
+        }
+        
+        .promotion-featured {
+            border-left: 4px solid #dc3545 !important;
+            transform: scale(1.02);
+        }
+        
+        .promotion-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .promotion-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+        
+        .promotion-expired {
+            opacity: 0.6;
+        }
+        
+        .promo-code {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            background: #f8f9fa !important;
+            border: 1px dashed #dee2e6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+        }
+        
+        .ribbon {
+            width: 150px;
+            height: 150px;
+            overflow: hidden;
+            position: absolute;
+        }
+        
+        .ribbon-top-right {
+            top: -10px;
+            right: -10px;
+        }
+        
+        .ribbon span {
+            position: absolute;
+            display: block;
+            width: 225px;
+            padding: 15px 0;
+            box-shadow: 0 5px 10px rgba(0,0,0,.1);
+            color: #fff;
+            font: 700 18px/1 'Lato', sans-serif;
+            text-shadow: 0 1px 1px rgba(0,0,0,.2);
+            text-transform: uppercase;
+            text-align: center;
+            left: -25px;
+            top: 30px;
+            transform: rotate(45deg);
+        }
+        
+        .promo-info-card {
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+        
+            .promo-info-card:hover {
+            border-color: var(--primary);
+            background: #f8f9ff !important;
+        }
+        
+        .promotion-icon i {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .promotion-value h5 {
+            font-weight: 700;
+        }
+    </style>
+</body>
+</html>

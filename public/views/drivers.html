@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài xế - DC Car Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-car me-2"></i>DC Car Booking
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Trang chủ</a>
+                    </li>
+                    <li class="nav-item" id="booking-nav">
+                        <a class="nav-link" href="booking.html">Đặt xe</a>
+                    </li>
+                    <li class="nav-item" id="trips-nav">
+                        <a class="nav-link" href="trips.html">Chuyến đi</a>
+                    </li>
+                    <li class="nav-item" id="drivers-nav">
+                        <a class="nav-link active" href="drivers.html">Tài xế</a>
+                    </li>
+                    <li class="nav-item" id="promos-nav">
+                        <a class="nav-link" href="promotions.html">Khuyến mãi</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown" id="user-menu" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <span id="user-name"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="profile.html">Hồ sơ</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" id="auth-btn">
+                        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#authModal">
+                            Đăng nhập
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2><i class="fas fa-users me-2"></i>Danh sách tài xế</h2>
+                <p class="text-muted">Tìm kiếm và lựa chọn tài xế phù hợp</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a id="driver-register-btn" href="../driver-registration.html" class="btn btn-success">
+                    <i class="fas fa-user-plus me-2"></i>Đăng ký làm tài xế
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Loại xe</label>
+                        <select class="form-select" id="car-type-filter">
+                            <option value="">Tất cả loại xe</option>
+                            <option value="4-cho">Xe 4 chỗ</option>
+                            <option value="7-cho">Xe 7 chỗ</option>
+                            <option value="16-cho">Xe 16 chỗ</option>
+                            <option value="45-cho">Xe 45 chỗ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kinh nghiệm</label>
+                        <select class="form-select" id="experience-filter">
+                            <option value="">Tất cả</option>
+                            <option value="1">Từ 1 năm</option>
+                            <option value="3">Từ 3 năm</option>
+                            <option value="5">Từ 5 năm</option>
+                            <option value="10">Từ 10 năm</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Đánh giá</label>
+                        <select class="form-select" id="rating-filter">
+                            <option value="">Tất cả đánh giá</option>
+                            <option value="4">Từ 4 sao trở lên</option>
+                            <option value="4.5">Từ 4.5 sao trở lên</option>
+                            <option value="4.8">Từ 4.8 sao trở lên</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-outline-primary me-2" onclick="applyFilters()">
+                            <i class="fas fa-filter me-2"></i>Lọc
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                            <i class="fas fa-times me-2"></i>Xóa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search-input" 
+                           placeholder="Tìm kiếm tài xế theo tên, số điện thoại...">
+                    <button class="btn btn-outline-secondary" onclick="searchDrivers()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available requests for drivers (chuyến chờ) -->
+        <div id="available-requests-card" class="card shadow-sm mb-4" style="display:none;">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Yêu cầu mới</h5>
+            </div>
+            <div class="card-body" id="available-requests-container" style="max-height:260px; overflow-y:auto;">
+                <div class="text-center text-muted small">Không có yêu cầu mới</div>
+            </div>
+        </div>
+
+        <!-- Driver's own trips (only visible for drivers) -->
+        <div id="driver-trips-section" style="display:none;" class="mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Đơn của tôi</h5>
+                </div>
+                <div class="card-body" id="driver-trips-container" style="max-height: 360px; overflow-y:auto;">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Đang tải danh sách đơn của bạn...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drivers Grid -->
+        <div id="drivers-container">
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Đang tải danh sách tài xế...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Drivers pagination" class="mt-4">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Driver Detail Modal -->
+    <div class="modal fade" id="driverDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thông tin tài xế</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="driver-detail-content">
+                    <!-- Driver details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="book-driver-btn" data-auth data-auth-roles="khach_hang">
+                        <i class="fas fa-car me-2"></i>Đặt xe với tài xế này
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check if API_BASE_URL is already defined
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize user authentication
+            checkAuth();
+            loadDrivers();
+            // If the logged-in user is a driver, start polling for notifications
+            setTimeout(() => {
+                try {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        // Try fetch profile to detect driver role
+                        fetch(`${API_BASE_URL}/auth/profile`, { headers: { 'Authorization': `Bearer ${token}` } })
+                            .then(r => r.json())
+                            .then(data => {
+                                const user = data && (data.data || data.user || data);
+                                if (user && user.loai_tai_khoan === 'tai_xe') {
+                                                    startNotificationPolling();
+                                                    // Show driver's trip section and load trips
+                                                    try {
+                                                        document.getElementById('driver-trips-section').style.display = '';
+                                                        loadDriverTrips();
+                                        // show available requests and load them
+                                        document.getElementById('available-requests-card').style.display = '';
+                                        loadAvailableRequests();
+                                                    } catch (e) { console.debug('Load driver trips failed init', e); }
+                                }
+                            }).catch(() => {});
+                    }
+                } catch (e) { console.debug('Notification poll init failed', e); }
+            }, 500);
+            
+            // Setup search on Enter key
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchDrivers();
+                    }
+                });
+            } else {
+                console.error('Search input not found');
+            }
+        });
+
+        // Authentication functions
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Update UI for logged in user
+                fetch(`${API_BASE_URL}/auth/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        updateUIForUser(result.data);
+                    } else {
+                        // Token invalid, clear it
+                        localStorage.removeItem('token');
+                        updateUIForGuest();
+                    }
+                })
+                .catch(error => {
+                    console.error('Auth check error:', error);
+                    updateUIForGuest();
+                });
+            } else {
+                updateUIForGuest();
+            }
+        }
+
+        function updateUIForUser(user) {
+            const userMenu = document.getElementById('user-menu');
+            const authBtn = document.getElementById('auth-btn');
+            const userName = document.getElementById('user-name');
+            
+            if (userMenu && authBtn && userName) {
+                userName.textContent = user.ten;
+                userMenu.style.display = 'block';
+                authBtn.style.display = 'none';
+            }
+
+            // Hide driver registration button on this page for users who are already drivers
+            try {
+                const driverRegisterBtn = document.getElementById('driver-register-btn');
+                if (driverRegisterBtn) {
+                    if (user.loai_tai_khoan === 'tai_xe') {
+                        driverRegisterBtn.style.display = 'none';
+                    } else {
+                        driverRegisterBtn.style.display = '';
+                    }
+                }
+            } catch (e) {
+                console.error('Error applying driver button visibility', e);
+            }
+
+            // Hide booking nav link in header for drivers
+            try {
+                const bookingNav = document.getElementById('booking-nav');
+                if (bookingNav) {
+                    if (user.loai_tai_khoan === 'tai_xe') {
+                        bookingNav.style.display = 'none';
+                    } else {
+                        bookingNav.style.display = '';
+                    }
+                }
+            } catch (e) {
+                console.error('Error applying booking nav visibility', e);
+            }
+
+            // If user is a driver, hide/disable booking buttons on this page
+            try {
+                if (user.loai_tai_khoan === 'tai_xe') {
+                    document.querySelectorAll('button').forEach(btn => {
+                        try {
+                            const txt = (btn.textContent || '').trim();
+                            if (txt.includes('Đặt xe')) {
+                                btn.style.display = 'none';
+                            }
+                        } catch (e) {}
+                    });
+                } else {
+                    // show booking buttons for non-driver users
+                    document.querySelectorAll('button').forEach(btn => {
+                        try {
+                            const txt = (btn.textContent || '').trim();
+                            if (txt.includes('Đặt xe')) {
+                                btn.style.display = '';
+                            }
+                        } catch (e) {}
+                    });
+                }
+            } catch (e) {
+                console.error('Error hiding booking buttons', e);
+            }
+        }
+
+        function updateUIForGuest() {
+            const userMenu = document.getElementById('user-menu');
+            const authBtn = document.getElementById('auth-btn');
+            
+            if (userMenu && authBtn) {
+                userMenu.style.display = 'none';
+                authBtn.style.display = 'block';
+            }
+
+            // Ensure the driver registration button is visible for guests
+            try {
+                const driverRegisterBtn = document.getElementById('driver-register-btn');
+                if (driverRegisterBtn) driverRegisterBtn.style.display = '';
+            } catch (e) {
+                console.error('Error showing driver register button for guest', e);
+            }
+        }
+
+        function logout() {
+            try {
+                if (window.dcApp && typeof window.dcApp.logout === 'function') {
+                    window.dcApp.logout();
+                    return;
+                }
+            } catch(e) {}
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
+
+        // Alert function
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alert-container');
+            if (!alertContainer) return;
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        async function loadDrivers(page = 1) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/drivers/available`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    displayDrivers(result.data);
+                    setupSimplePagination(result.data.length);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Load drivers error:', error);
+                document.getElementById('drivers-container').innerHTML = `
+                    <div class="text-center">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Lỗi khi tải danh sách tài xế: ${error.message}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function displayDrivers(drivers) {
+            const container = document.getElementById('drivers-container');
+            
+            if (!drivers || drivers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center">
+                        <div class="card shadow-sm">
+                            <div class="card-body py-5">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <h5>Không tìm thấy tài xế nào</h5>
+                                <p class="text-muted">Hiện tại chưa có tài xế nào đang hoạt động trong hệ thống.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="row">';
+            drivers.forEach((driver, index) => {
+                const rating = Number(driver.diem_danh_gia || 0).toFixed(1);
+                const trips = Number(driver.so_chuyen_di || 0);
+                const experience = driver.kinh_nghiem_lien_tuc || 0;
+
+                html += `
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm driver-card">
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <div class="driver-avatar mb-2">
+                                        <i class="fas fa-user-circle fa-4x text-primary"></i>
+                                    </div>
+                                    <h5 class="card-title mb-1">${driver.ten || 'N/A'}</h5>
+                                    <div class="rating mb-2">
+                                        ${generateStars(rating)} 
+                                        <span class="text-muted">(${trips} chuyến)</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="driver-info">
+                                    <div class="info-item mb-2">
+                                        <i class="fas fa-car text-primary me-2"></i>
+                                        <strong>${driver.loai_xe || 'N/A'}</strong> - ${driver.so_cho_ngoi || 'N/A'} chỗ
+                                    </div>
+                                    <div class="info-item mb-2">
+                                        <i class="fas fa-palette text-info me-2"></i>
+                                        ${driver.hang_xe || 'N/A'} ${driver.mau_xe || ''}
+                                    </div>
+                                    <div class="info-item mb-2">
+                                        <i class="fas fa-id-card text-success me-2"></i>
+                                        Bằng lái ${driver.loai_bang_lai || 'N/A'}
+                                    </div>
+                                    <div class="info-item mb-2">
+                                        <i class="fas fa-clock text-warning me-2"></i>
+                                        ${experience} năm kinh nghiệm
+                                    </div>
+                                    <div class="info-item mb-2">
+                                        <i class="fas fa-phone text-secondary me-2"></i>
+                                        ${driver.so_dien_thoai || 'N/A'}
+                                    </div>
+                                </div>
+                                
+                                <div class="status-badges mt-3 mb-3">
+                                    <span class="badge bg-success">Đang hoạt động</span>
+                                    <span class="badge bg-info">Xe sạch sẽ</span>
+                                    ${rating >= 4.5 ? '<span class="badge bg-warning text-dark">Tài xế xuất sắc</span>' : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer bg-transparent">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary" onclick="viewDriverDetail(${driver.id || driver.tai_xe_id})">
+                                        <i class="fas fa-eye me-2"></i>Xem chi tiết
+                                    </button>
+                                    <button class="btn btn-primary book-now-btn" data-auth data-auth-roles="khach_hang" onclick="bookWithDriver(${driver.id || driver.tai_xe_id})">
+                                        <i class="fas fa-car me-2"></i>Đặt xe ngay
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        // rating now comes from database (diem_danh_gia)
+
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let html = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                html += '<i class="fas fa-star text-warning"></i>';
+            }
+            
+            if (hasHalfStar) {
+                html += '<i class="fas fa-star-half-alt text-warning"></i>';
+            }
+            
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                html += '<i class="far fa-star text-warning"></i>';
+            }
+            
+            html += ` <span class="ms-1"><strong>${rating}</strong></span>`;
+            return html;
+        }
+
+        function setupPagination(pagination) {
+            totalPages = pagination.totalPages;
+            currentPage = pagination.currentPage;
+            
+            const paginationContainer = document.getElementById('pagination');
+            let html = '';
+
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            // Previous button
+            html += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadDrivers(${currentPage - 1})">Trước</a>
+                </li>
+            `;
+
+            // Page numbers
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadDrivers(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next button
+            html += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadDrivers(${currentPage + 1})">Sau</a>
+                </li>
+            `;
+
+            paginationContainer.innerHTML = html;
+        }
+
+        function setupSimplePagination(driverCount) {
+            const paginationContainer = document.getElementById('pagination');
+            // Simple pagination for available drivers - just show count
+            paginationContainer.innerHTML = `
+                <div class="text-center text-muted">
+                    <i class="fas fa-users me-2"></i>
+                    Hiển thị ${driverCount} tài xế có sẵn
+                </div>
+            `;
+        }
+
+        function applyFilters() {
+            currentFilters = {
+                car_type: document.getElementById('car-type-filter').value,
+                min_experience: document.getElementById('experience-filter').value,
+                min_rating: document.getElementById('rating-filter').value
+            };
+
+            // Remove empty filters
+            Object.keys(currentFilters).forEach(key => {
+                if (!currentFilters[key]) {
+                    delete currentFilters[key];
+                }
+            });
+
+            loadDrivers(1);
+        }
+
+        function clearFilters() {
+            document.getElementById('car-type-filter').value = '';
+            document.getElementById('experience-filter').value = '';
+            document.getElementById('rating-filter').value = '';
+            document.getElementById('search-input').value = '';
+            currentFilters = {};
+            loadDrivers(1);
+        }
+
+        function searchDrivers() {
+            const searchTerm = document.getElementById('search-input').value.trim();
+            if (searchTerm) {
+                currentFilters.search = searchTerm;
+            } else {
+                delete currentFilters.search;
+            }
+            loadDrivers(1);
+        }
+
+        async function viewDriverDetail(driverId) {
+            try {
+                // Use public driver info endpoint so non-admin users can view details
+                const response = await fetch(`${API_BASE_URL}/drivers/public/${driverId}`);
+                const result = await response.json();
+
+                if (result.success) {
+                        // driver data may already include so_chuyen_di after backend update
+                        displayDriverDetail(result.data);
+                    const modal = new bootstrap.Modal(document.getElementById('driverDetailModal'));
+                    modal.show();
+                } else {
+                    showAlert('error', 'Không thể tải thông tin tài xế');
+                }
+            } catch (error) {
+                console.error('Load driver detail error:', error);
+                showAlert('error', 'Lỗi khi tải thông tin tài xế');
+            }
+        }
+
+        function displayDriverDetail(driver) {
+                const rating = Number(driver.diem_danh_gia || 0).toFixed(1);
+                const trips = Number(driver.so_chuyen_di || 0);
+                const experience = driver.kinh_nghiem_lien_tuc || 0;
+                const reviewCount = Number(driver.so_luot_danh_gia || 0);
+
+            const content = `
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-user-circle fa-5x text-primary mb-3"></i>
+                        <h4>${driver.ten}</h4>
+                        <div class="rating mb-1">
+                            ${generateStars(rating)}
+                        </div>
+                        <div class="small text-muted mb-3">Đánh giá: ${rating} ★ (${reviewCount} lượt)</div>
+                        <div class="stats">
+                            <div class="stat-item mb-2">
+                                <strong>${trips}</strong> chuyến đi đã hoàn thành
+                            </div>
+                            <div class="stat-item mb-2">
+                                <strong>${experience}</strong> năm kinh nghiệm
+                            </div>
+                            <div class="stat-item">
+                                <span class="badge bg-success">Đang hoạt động</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Thông tin cá nhân</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr><td><i class="fas fa-phone me-2"></i>Điện thoại:</td><td>${driver.so_dien_thoai}</td></tr>
+                                    <tr><td><i class="fas fa-envelope me-2"></i>Email:</td><td>${driver.email}</td></tr>
+                                    <tr><td><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ:</td><td>${driver.dia_chi || 'Chưa cập nhật'}</td></tr>
+                                </table>
+                                
+                                <h6 class="mt-3">Bằng lái xe</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr><td><i class="fas fa-id-card me-2"></i>Số bằng lái:</td><td>${driver.so_bang_lai}</td></tr>
+                                    <tr><td><i class="fas fa-certificate me-2"></i>Loại bằng lái:</td><td>${driver.loai_bang_lai}</td></tr>
+                                    <tr><td><i class="fas fa-clock me-2"></i>Kinh nghiệm:</td><td>${experience} năm</td></tr>
+                                    <tr><td><i class="fas fa-star me-2"></i>Điểm TB:</td><td>${rating} ★ (${reviewCount} lượt)</td></tr>
+                                </table>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6>Thông tin xe</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr><td><i class="fas fa-car me-2"></i>Loại xe:</td><td>${driver.loai_xe}</td></tr>
+                                    <tr><td><i class="fas fa-hashtag me-2"></i>Biển số:</td><td><strong>${driver.bien_so_xe}</strong></td></tr>
+                                    <tr><td><i class="fas fa-industry me-2"></i>Hãng xe:</td><td>${driver.hang_xe}</td></tr>
+                                    <tr><td><i class="fas fa-palette me-2"></i>Màu sắc:</td><td>${driver.mau_xe}</td></tr>
+                                    <tr><td><i class="fas fa-users me-2"></i>Số chỗ ngồi:</td><td>${driver.so_cho_ngoi} chỗ</td></tr>
+                                </table>
+                                
+                                <h6 class="mt-3">Đánh giá gần đây</h6>
+                                <div class="reviews">
+                                    <div class="review-item mb-2 p-2 bg-light rounded">
+                                        <div class="d-flex justify-content-between">
+                                            <small><strong>Khách hàng A</strong></small>
+                                            <small class="text-warning">⭐⭐⭐⭐⭐</small>
+                                        </div>
+                                        <small class="text-muted">Tài xế lái xe an toàn, thái độ phục vụ tốt!</small>
+                                    </div>
+                                    <div class="review-item mb-2 p-2 bg-light rounded">
+                                        <div class="d-flex justify-content-between">
+                                            <small><strong>Khách hàng B</strong></small>
+                                            <small class="text-warning">⭐⭐⭐⭐⭐</small>
+                                        </div>
+                                        <small class="text-muted">Xe sạch sẽ, đúng giờ. Rất hài lòng!</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('driver-detail-content').innerHTML = content;
+            document.getElementById('book-driver-btn').onclick = () => bookWithDriver(driver.id);
+
+            // Load real reviews for this driver and replace the static sample
+            try { loadDriverReviews(driver.id); } catch (e) { console.debug('loadDriverReviews failed', e); }
+        }
+
+        function bookWithDriver(driverId) {
+            // Close modal if open
+            const modal = bootstrap.Modal.getInstance(document.getElementById('driverDetailModal'));
+            if (modal) modal.hide();
+            
+            // Redirect to booking page with driver pre-selected
+            window.location.href = `booking.html?driver=${driverId}`;
+        }
+
+        // Load reviews for a driver and render into the driver detail modal
+        async function loadDriverReviews(driverId) {
+            const container = document.querySelector('#driver-detail-content .reviews');
+            if (!container) return;
+            container.innerHTML = '<div class="text-center small text-muted">Đang tải đánh giá...</div>';
+            try {
+                // Only add Authorization header when a token exists to avoid sending an empty header
+                const token = localStorage.getItem('token');
+                const headers = {};
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch(`${API_BASE_URL}/reviews/driver/${driverId}`, { headers });
+                if (!res.ok) throw new Error('Không thể tải đánh giá');
+                const result = await res.json();
+                if (!result.success) throw new Error(result.message || 'Lỗi');
+
+                // API may return either an array (legacy) or an object { driver, reviews }
+                const payload = result.data;
+                const reviews = Array.isArray(payload) ? payload : (payload && payload.reviews ? payload.reviews : []);
+
+                // If API provided driver info together with reviews, update modal driver info fields
+                let driverFromPayload = payload && payload.driver ? payload.driver : null;
+                if (driverFromPayload) {
+                    try {
+                        updateDriverInfoInModal(driverFromPayload);
+                    } catch (e) {
+                        console.debug('updateDriverInfoInModal failed', e);
+                    }
+                } else {
+                    // Fallback: request public driver info if reviews API didn't include it
+                    try {
+                        const drvRes = await fetch(`${API_BASE_URL}/drivers/public/${driverId}`);
+                        if (drvRes.ok) {
+                            const drvJson = await drvRes.json();
+                            if (drvJson && drvJson.success && drvJson.data) {
+                                updateDriverInfoInModal(drvJson.data);
+                            }
+                        }
+                    } catch (e) {
+                        console.debug('Fallback fetch for driver info failed', e);
+                    }
+                }
+
+                if (reviews.length === 0) {
+                    container.innerHTML = '<div class="text-center small text-muted">Chưa có đánh giá nào</div>';
+                    return;
+                }
+
+                // Render each review: customer name, stars, comment, date
+                const html = reviews.map(r => {
+                    const score = parseInt(r.diem_so || 0, 10) || 0;
+                    const stars = '★'.repeat(score) + '☆'.repeat(5 - score);
+                    const customer = r.khach_hang || r.ten || 'Khách hàng';
+                    const comment = r.binh_luan || r.nhan_xet || '';
+                    const date = r.created_at ? new Date(r.created_at).toLocaleString('vi-VN') : '';
+                    return `
+                        <div class="review-item mb-2 p-2 bg-light rounded">
+                            <div class="d-flex justify-content-between">
+                                <small><strong>${customer}</strong></small>
+                                <small class="text-warning">${stars}</small>
+                            </div>
+                            <small class="text-muted">${comment}</small>
+                            <div class="text-muted small mt-1">${date}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = html;
+            } catch (e) {
+                console.error('Load driver reviews error', e);
+                container.innerHTML = `<div class="text-center small text-danger">Lỗi khi tải đánh giá: ${e.message}</div>`;
+            }
+        }
+
+        // Update driver info fields in the modal when reviews endpoint returns driver object
+        function updateDriverInfoInModal(driver) {
+            if (!driver) return;
+            const modal = document.getElementById('driverDetailModal');
+            if (!modal) return;
+            const container = document.getElementById('driver-detail-content');
+            if (!container) return;
+
+            // Update name
+            const nameEl = container.querySelector('h4');
+            if (nameEl) nameEl.textContent = driver.ten || nameEl.textContent;
+
+            // Update rating display (first occurrence)
+            const ratingEl = container.querySelector('.rating');
+            if (ratingEl) {
+                const rating = Number(driver.diem_danh_gia || 0).toFixed(1);
+                ratingEl.innerHTML = (function() {
+                    const fullStars = Math.floor(rating);
+                    const hasHalf = rating % 1 >= 0.5;
+                    let s = '';
+                    for (let i=0;i<fullStars;i++) s += '<i class="fas fa-star text-warning"></i>';
+                    if (hasHalf) s += '<i class="fas fa-star-half-alt text-warning"></i>';
+                    const empty = 5 - fullStars - (hasHalf ? 1 : 0);
+                    for (let i=0;i<empty;i++) s += '<i class="far fa-star text-warning"></i>';
+                    s += ` <span class="ms-1"><strong>${rating}</strong></span>`;
+                    return s;
+                })();
+            }
+
+            // Update phone/email fields in personal info table
+            const infoRows = container.querySelectorAll('table.table td');
+            if (infoRows && infoRows.length > 0) {
+                // Attempt to find cells by label text is complex; fallback: replace known phone/email cells by searching their textContent placeholders
+                const phoneCell = Array.from(container.querySelectorAll('table.table td')).find(td => td.textContent && td.textContent.match(/[0-9\s\-()+]{6,}/));
+                if (phoneCell && driver.so_dien_thoai) phoneCell.textContent = driver.so_dien_thoai;
+                const emailCell = Array.from(container.querySelectorAll('table.table td')).find(td => td.textContent && td.textContent.includes('@'));
+                if (emailCell && driver.email) emailCell.textContent = driver.email;
+            }
+        }
+
+        // ----------------------- Driver Trips (assigned to this driver) -----------------------
+        async function loadDriverTrips(page = 1) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const res = await fetch(`${API_BASE_URL}/trips/my-trips?page=${page}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) throw new Error('Không thể tải đơn');
+                const result = await res.json();
+                if (!result.success) throw new Error(result.message || 'Lỗi');
+
+                const trips = result.data.trips || [];
+                displayDriverTrips(trips);
+            } catch (e) {
+                console.error('Load driver trips error', e);
+                document.getElementById('driver-trips-container').innerHTML = `
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <p>Lỗi khi tải danh sách đơn: ${e.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayDriverTrips(trips) {
+            const container = document.getElementById('driver-trips-container');
+            if (!trips || trips.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <p>Hiện chưa có đơn nào được gán cho bạn.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="list-group">';
+            trips.forEach(t => {
+                const statusBadge = {
+                    'cho_tai_xe': '<span class="badge bg-secondary">Chờ tài xế</span>',
+                    'da_nhan': '<span class="badge bg-info">Đã nhận</span>',
+                    'dang_di': '<span class="badge bg-primary">Đang đi</span>',
+                    'hoan_thanh': '<span class="badge bg-success">Hoàn thành</span>',
+                    'huy_bo': '<span class="badge bg-danger">Đã hủy</span>'
+                }[t.trang_thai] || `<span class="badge bg-light text-dark">${t.trang_thai}</span>`;
+
+                html += `
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">#${t.id} — ${t.diem_don} → ${t.diem_den}</h6>
+                            <small>${statusBadge}</small>
+                        </div>
+                        <p class="mb-1 text-muted">Giá: ${new Intl.NumberFormat('vi-VN').format(t.gia_cuoc || t.tong_tien || 0)} VND • Thời gian: ${t.thoi_gian_du_kien || t.thoi_gian_dat || ''}</p>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="viewTripDetail(${t.id})">Xem chi tiết</button>
+                            ${t.trang_thai === 'cho_tai_xe' ? `<button class="btn btn-sm btn-success me-2" onclick="acceptTrip(${t.id})">Nhận</button>` : ''}
+                            ${t.trang_thai === 'da_nhan' ? `<button class="btn btn-sm btn-primary me-2" onclick="startTrip(${t.id})">Bắt đầu</button>` : ''}
+                            ${t.trang_thai === 'dang_di' ? `<button class="btn btn-sm btn-success me-2" onclick="completeTrip(${t.id})">Hoàn thành</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function viewTripDetail(tripId) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return showAlert('warning', 'Vui lòng đăng nhập');
+                const res = await fetch(`${API_BASE_URL}/trips/${tripId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if (!result.success) return showAlert('error', result.message || 'Không thể tải chi tiết');
+
+                const trip = result.data;
+                // Show simple modal or alert with details
+                const content = `
+                    Điểm đón: ${trip.diem_don}\n
+                    Điểm đến: ${trip.diem_den}\n
+                    Giá cước: ${new Intl.NumberFormat('vi-VN').format(trip.gia_cuoc || trip.tong_tien || 0)} VND\n
+                    Trạng thái: ${trip.trang_thai}\n
+                    Ghi chú: ${trip.ghi_chu || '-'}
+                `;
+                alert(content);
+            } catch (e) {
+                console.error('View trip detail error', e);
+                showAlert('error', 'Lỗi khi tải chi tiết chuyến');
+            }
+        }
+
+        async function acceptTrip(tripId) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return showAlert('warning', 'Vui lòng đăng nhập');
+                const res = await fetch(`${API_BASE_URL}/trips/${tripId}/accept`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('success', 'Bạn đã nhận chuyến');
+                    loadDriverTrips();
+                } else {
+                    showAlert('error', result.message || 'Không thể nhận chuyến');
+                }
+            } catch (e) {
+                console.error('Accept trip error', e);
+                showAlert('error', 'Lỗi khi nhận chuyến');
+            }
+        }
+
+        async function startTrip(tripId) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return showAlert('warning', 'Vui lòng đăng nhập');
+                const res = await fetch(`${API_BASE_URL}/trips/${tripId}/start`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('success', 'Đã bắt đầu chuyến đi');
+                    loadDriverTrips();
+                } else {
+                    showAlert('error', result.message || 'Không thể bắt đầu chuyến');
+                }
+            } catch (e) {
+                console.error('Start trip error', e);
+                showAlert('error', 'Lỗi khi bắt đầu chuyến');
+            }
+        }
+
+        async function completeTrip(tripId) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return showAlert('warning', 'Vui lòng đăng nhập');
+                const res = await fetch(`${API_BASE_URL}/trips/${tripId}/complete`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('success', 'Đã hoàn thành chuyến đi');
+                    loadDriverTrips();
+                } else {
+                    showAlert('error', result.message || 'Không thể hoàn thành chuyến');
+                }
+            } catch (e) {
+                console.error('Complete trip error', e);
+                showAlert('error', 'Lỗi khi hoàn thành chuyến');
+            }
+        }
+
+        // ----------------------- Driver notification polling -----------------------
+        let notificationPollInterval = null;
+        async function fetchDriverNotifications() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const res = await fetch(`${API_BASE_URL}/drivers/notifications`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) return;
+                const result = await res.json();
+                if (result.success && result.data && result.data.length > 0) {
+                    // Show the first pending notification(s)
+                    result.data.forEach(n => {
+                        if (n.status === 'pending') {
+                            showDriverNotificationToast(n);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.debug('Driver notification fetch error', e);
+            }
+        }
+
+        // ----------------------- Available trip requests -----------------------
+        async function loadAvailableRequests() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const res = await fetch(`${API_BASE_URL}/trips/available/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) throw new Error('Không thể tải yêu cầu');
+                const result = await res.json();
+                if (!result.success) throw new Error(result.message || 'Lỗi');
+
+                const trips = result.data || [];
+                displayAvailableRequests(trips);
+            } catch (e) {
+                console.error('Load available requests error', e);
+                const container = document.getElementById('available-requests-container');
+                container.innerHTML = `<div class="text-center text-danger small">Lỗi khi tải yêu cầu</div>`;
+            }
+        }
+
+        function displayAvailableRequests(trips) {
+            const container = document.getElementById('available-requests-container');
+            if (!trips || trips.length === 0) {
+                container.innerHTML = `<div class="text-center text-muted small">Không có yêu cầu mới</div>`;
+                return;
+            }
+
+            let html = '';
+            trips.forEach(t => {
+                html += `
+                    <div class="d-flex align-items-start justify-content-between mb-2 p-2 border rounded">
+                        <div>
+                            <div class="fw-bold">#${t.id} • ${t.diem_don} → ${t.diem_den}</div>
+                            <small class="text-muted">Giá: ${t.gia_cuoc ? new Intl.NumberFormat('vi-VN').format(t.gia_cuoc) + ' VND' : 'Chưa xác định'}</small>
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-sm btn-primary me-1" onclick="viewTripDetail(${t.id})">Chi tiết</button>
+                            <button class="btn btn-sm btn-success" onclick="acceptTrip(${t.id})">Nhận</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function startNotificationPolling() {
+            if (notificationPollInterval) return;
+            // Poll every 10 seconds
+            fetchDriverNotifications();
+            notificationPollInterval = setInterval(fetchDriverNotifications, 10000);
+        }
+
+        function stopNotificationPolling() {
+            if (notificationPollInterval) {
+                clearInterval(notificationPollInterval);
+                notificationPollInterval = null;
+            }
+        }
+
+        function showDriverNotificationToast(notification) {
+            // Create a simple dismissible toast in the corner
+            const container = document.getElementById('alert-container');
+            const div = document.createElement('div');
+            div.className = 'toast show align-items-center text-bg-light border';
+            div.style.minWidth = '320px';
+            div.style.marginBottom = '8px';
+            div.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <strong>Thông báo chuyến mới</strong><br>
+                        <small class="text-muted">${notification.message || 'Bạn có chuyến mới'}</small>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-success me-2" onclick="acceptTripFromNotification(${notification.trip_id}, ${notification.id})">Nhận</button>
+                            <button class="btn btn-sm btn-secondary" onclick="dismissNotification(${notification.id})">Đóng</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" aria-label="Close" onclick="dismissNotification(${notification.id})"></button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        async function dismissNotification(notificationId) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                await fetch(`${API_BASE_URL}/drivers/notifications/${notificationId}/seen`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (e) { console.debug('Dismiss notification failed', e); }
+        }
+
+        async function acceptTripFromNotification(tripId, notificationId) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return showAlert('warning', 'Vui lòng đăng nhập');
+
+                const res = await fetch(`${API_BASE_URL}/trips/${tripId}/accept`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('success', 'Bạn đã nhận chuyến đi');
+                    // Mark notification as accepted (best-effort)
+                    await fetch(`${API_BASE_URL}/drivers/notifications/${notificationId}/status`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'accepted' })
+                    });
+                } else {
+                    showAlert('error', result.message || 'Không thể nhận chuyến');
+                }
+            } catch (e) {
+                console.error('Accept trip error', e);
+                showAlert('error', 'Lỗi khi nhận chuyến');
+            }
+        }
+    </script>
+
+    <style>
+        .driver-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .driver-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+        
+        .driver-avatar {
+            transition: color 0.2s;
+        }
+        
+        .driver-card:hover .driver-avatar i {
+            color: var(--primary) !important;
+        }
+        
+        .info-item {
+            font-size: 0.9rem;
+        }
+        
+        .status-badges .badge {
+            font-size: 0.7rem;
+            margin-right: 0.25rem;
+        }
+        
+        .rating .fa-star,
+        .rating .fa-star-half-alt {
+            font-size: 0.9rem;
+        }
+        
+        .review-item {
+            border-left: 3px solid var(--primary);
+        }
+        
+        .stat-item {
+            font-size: 0.9rem;
+        }
+    </style>
+</body>
+</html>

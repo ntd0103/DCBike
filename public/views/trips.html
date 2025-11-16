@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyến đi - DC Car Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-car me-2"></i>DC Car Booking
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Trang chủ</a>
+                    </li>
+                    <li class="nav-item" id="booking-nav">
+                        <a class="nav-link" href="booking.html">Đặt xe</a>
+                    </li>
+                    <li class="nav-item" id="trips-nav">
+                        <a class="nav-link active" href="trips.html">Chuyến đi</a>
+                    </li>
+                    <li class="nav-item" id="drivers-nav">
+                        <a class="nav-link" href="drivers.html">Tài xế</a>
+                    </li>
+                    <li class="nav-item" id="promos-nav">
+                        <a class="nav-link" href="promotions.html">Khuyến mãi</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown d-none" id="user-nav">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <span id="user-name"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="profile.html">Hồ sơ</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" id="auth-nav">
+                        <button id="auth-btn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#authModal">
+                            Đăng nhập
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2><i class="fas fa-route me-2"></i>Chuyến đi của tôi</h2>
+                <p class="text-muted">Quản lý và theo dõi các chuyến đi</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a id="book-new-btn" href="booking.html" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Đặt xe mới
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter and Search -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" id="status-filter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="cho_xac_nhan">Chờ xác nhận</option>
+                            <option value="da_xac_nhan">Đã xác nhận</option>
+                            <option value="dang_thuc_hien">Đang thực hiện</option>
+                            <option value="hoan_thanh">Hoàn thành</option>
+                            <option value="da_huy">Đã hủy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Từ ngày</label>
+                        <input type="date" class="form-control" id="date-from">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Đến ngày</label>
+                        <input type="date" class="form-control" id="date-to">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-outline-primary me-2" onclick="applyFilters()">
+                            <i class="fas fa-filter me-2"></i>Lọc
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                            <i class="fas fa-times me-2"></i>Xóa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trips List -->
+        <div id="trips-container">
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Đang tải danh sách chuyến đi...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Trips pagination" class="mt-4">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Trip Detail Modal -->
+    <div class="modal fade" id="tripDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết chuyến đi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="trip-detail-content">
+                    <!-- Trip details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="cancel-trip-btn" style="display: none;">
+                        <i class="fas fa-times me-2"></i>Hủy chuyến
+                    </button>
+                    <button type="button" class="btn btn-primary" id="rate-trip-btn" style="display: none;">
+                        <i class="fas fa-star me-2"></i>Đánh giá
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div class="modal fade" id="ratingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đánh giá chuyến đi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="rating-form">
+                        <input type="hidden" id="rating-trip-id">
+                        
+                        <div class="mb-3 d-flex align-items-start">
+                            <div id="rating-driver-summary" style="min-width:220px; margin-right:12px;">
+                                <!-- Driver summary will be injected here -->
+                            </div>
+                            <div style="flex:1;">
+                                <label class="form-label">Đánh giá tài xế</label>
+                                <div class="rating-stars mb-2">
+                                    <i class="fas fa-star star" data-rating="1"></i>
+                                    <i class="fas fa-star star" data-rating="2"></i>
+                                    <i class="fas fa-star star" data-rating="3"></i>
+                                    <i class="fas fa-star star" data-rating="4"></i>
+                                    <i class="fas fa-star star" data-rating="5"></i>
+                                </div>
+                                <input type="hidden" id="driver-rating" value="5">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nhận xét</label>
+                            <textarea class="form-control" id="review-comment" rows="3" 
+                                      placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="submitRating()">
+                        <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTrips();
+            
+            // Setup rating stars
+            setupRatingStars();
+        });
+
+        async function loadTrips(page = 1) {
+            if (!dcApp.token) {
+                document.getElementById('trips-container').innerHTML = `
+                    <div class="text-center">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Vui lòng đăng nhập để xem chuyến đi
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const queryParams = new URLSearchParams({
+                    page: page,
+                    limit: 10,
+                    ...currentFilters
+                });
+
+                const response = await fetch(`${API_BASE_URL}/trips/user?${queryParams}`, {
+                    headers: {
+                        'Authorization': `Bearer ${dcApp.token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayTrips(result.data.trips);
+                    setupPagination(result.data.pagination);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Load trips error:', error);
+                document.getElementById('trips-container').innerHTML = `
+                    <div class="text-center">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Lỗi khi tải danh sách chuyến đi
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function displayTrips(trips) {
+            const container = document.getElementById('trips-container');
+            
+            if (trips.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center">
+                        <div class="card shadow-sm">
+                            <div class="card-body py-5">
+                                <i class="fas fa-car fa-3x text-muted mb-3"></i>
+                                <h5>Chưa có chuyến đi nào</h5>
+                                <p class="text-muted">Hãy đặt chuyến đi đầu tiên của bạn!</p>
+                                <a href="booking.html" class="btn btn-primary book-now-btn">
+                                    <i class="fas fa-plus me-2"></i>Đặt xe ngay
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            trips.forEach(trip => {
+                const statusInfo = getStatusInfo(trip.trang_thai);
+                const formattedDate = new Date(trip.thoi_gian_don).toLocaleString('vi-VN');
+                const price = trip.gia_cuoc ? new Intl.NumberFormat('vi-VN').format(trip.gia_cuoc) + ' VND' : 'Chưa xác định';
+
+                html += `
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <h6 class="mb-0 me-3">Chuyến đi #${trip.id}</h6>
+                                        <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
+                                    </div>
+                                    
+                                    <div class="trip-route mb-2">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                            <strong>Điểm đón:</strong> <span class="ms-2">${trip.diem_don}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                            <strong>Điểm đến:</strong> <span class="ms-2">${trip.diem_den}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="trip-info text-muted">
+                                        <small>
+                                            <i class="fas fa-clock me-1"></i> ${formattedDate}
+                                            ${trip.loai_xe ? `<i class="fas fa-car ms-3 me-1"></i> ${trip.loai_xe}` : ''}
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 text-md-end">
+                                    <div class="price mb-2">
+                                        <h5 class="text-primary mb-0">${price}</h5>
+                                    </div>
+                                    
+                                    <div class="actions">
+                                        <button class="btn btn-outline-primary btn-sm me-2" 
+                                                onclick="viewTripDetail(${trip.id})">
+                                            <i class="fas fa-eye me-1"></i>Chi tiết
+                                        </button>
+                                        ${trip.trang_thai === 'cho_xac_nhan' || trip.trang_thai === 'da_xac_nhan' ? 
+                                            `<button class="btn btn-outline-danger btn-sm" onclick="cancelTrip(${trip.id})">
+                                                <i class="fas fa-times me-1"></i>Hủy
+                                            </button>` : ''
+                                        }
+                                        ${trip.trang_thai === 'hoan_thanh' 
+                                           && !trip.da_danh_gia 
+                                           && window.dcApp 
+                                           && window.dcApp.user 
+                                           && window.dcApp.user.loai_tai_khoan === 'khach_hang'
+                                           && Number(trip.khach_hang_id) === Number(window.dcApp.user.id)
+                                           ? `<button class="btn btn-outline-warning btn-sm" onclick="rateTrip(${trip.id})">
+                                                <i class="fas fa-star me-1"></i>Đánh giá
+                                             </button>` : ''
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function getStatusInfo(status) {
+            const statusMap = {
+                'cho_xac_nhan': { text: 'Chờ xác nhận', class: 'bg-warning text-dark' },
+                'da_xac_nhan': { text: 'Đã xác nhận', class: 'bg-info text-white' },
+                'dang_thuc_hien': { text: 'Đang thực hiện', class: 'bg-primary text-white' },
+                'hoan_thanh': { text: 'Hoàn thành', class: 'bg-success text-white' },
+                'da_huy': { text: 'Đã hủy', class: 'bg-danger text-white' }
+            };
+            return statusMap[status] || { text: status, class: 'bg-secondary text-white' };
+        }
+
+        function setupPagination(pagination) {
+            totalPages = pagination.totalPages;
+            currentPage = pagination.currentPage;
+            
+            const paginationContainer = document.getElementById('pagination');
+            let html = '';
+
+            // Previous button
+            html += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadTrips(${currentPage - 1})">Trước</a>
+                </li>
+            `;
+
+            // Page numbers
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadTrips(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next button
+            html += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadTrips(${currentPage + 1})">Sau</a>
+                </li>
+            `;
+
+            paginationContainer.innerHTML = html;
+        }
+
+        function applyFilters() {
+            currentFilters = {
+                status: document.getElementById('status-filter').value,
+                date_from: document.getElementById('date-from').value,
+                date_to: document.getElementById('date-to').value
+            };
+
+            // Remove empty filters
+            Object.keys(currentFilters).forEach(key => {
+                if (!currentFilters[key]) {
+                    delete currentFilters[key];
+                }
+            });
+
+            loadTrips(1);
+        }
+
+        function clearFilters() {
+            document.getElementById('status-filter').value = '';
+            document.getElementById('date-from').value = '';
+            document.getElementById('date-to').value = '';
+            currentFilters = {};
+            loadTrips(1);
+        }
+
+        async function viewTripDetail(tripId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/trips/${tripId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${dcApp.token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayTripDetail(result.data);
+                    const modal = new bootstrap.Modal(document.getElementById('tripDetailModal'));
+                    modal.show();
+                } else {
+                    showAlert('error', 'Không thể tải chi tiết chuyến đi');
+                }
+            } catch (error) {
+                console.error('Load trip detail error:', error);
+                showAlert('error', 'Lỗi khi tải chi tiết chuyến đi');
+            }
+        }
+
+        function displayTripDetail(trip) {
+            const statusInfo = getStatusInfo(trip.trang_thai);
+            const formattedDate = new Date(trip.thoi_gian_don).toLocaleString('vi-VN');
+            const price = trip.gia_cuoc ? new Intl.NumberFormat('vi-VN').format(trip.gia_cuoc) + ' VND' : 'Chưa xác định';
+
+            const content = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Thông tin chuyến đi</h6>
+                        <table class="table table-borderless">
+                            <tr><td><strong>Mã chuyến:</strong></td><td>#${trip.id}</td></tr>
+                            <tr><td><strong>Trạng thái:</strong></td><td><span class="badge ${statusInfo.class}">${statusInfo.text}</span></td></tr>
+                            <tr><td><strong>Thời gian đón:</strong></td><td>${formattedDate}</td></tr>
+                            <tr><td><strong>Loại xe:</strong></td><td>${trip.loai_xe || 'Chưa xác định'}</td></tr>
+                            <tr><td><strong>Giá cước:</strong></td><td class="text-primary"><strong>${price}</strong></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Lộ trình</h6>
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                <div>
+                                    <strong>Điểm đón</strong><br>
+                                    <span class="text-muted">${trip.diem_don}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                <div>
+                                    <strong>Điểm đến</strong><br>
+                                    <span class="text-muted">${trip.diem_den}</span>
+                                </div>
+                            </div>
+                        </div>
+                        ${trip.ghi_chu ? `
+                            <h6>Ghi chú</h6>
+                            <p class="text-muted">${trip.ghi_chu}</p>
+                        ` : ''}
+                    </div>
+                </div>
+                ${trip.tai_xe ? `
+                    <hr>
+                    <h6>Thông tin tài xế</h6>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-circle fa-2x text-primary me-3"></i>
+                        <div>
+                            <h6 class="mb-1">${trip.tai_xe.ten}</h6>
+                            <p class="mb-0 text-muted">
+                                <i class="fas fa-phone me-1"></i> ${trip.tai_xe.so_dien_thoai}
+                            </p>
+                            <p class="mb-0 text-muted">
+                                <i class="fas fa-car me-1"></i> ${trip.tai_xe.loai_xe} - ${trip.tai_xe.bien_so_xe}
+                            </p>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('trip-detail-content').innerHTML = content;
+
+            // Show/hide action buttons
+            const cancelBtn = document.getElementById('cancel-trip-btn');
+            const rateBtn = document.getElementById('rate-trip-btn');
+            
+            cancelBtn.style.display = (trip.trang_thai === 'cho_xac_nhan' || trip.trang_thai === 'da_xac_nhan') ? 'block' : 'none';
+            rateBtn.style.display = (trip.trang_thai === 'hoan_thanh' && !trip.da_danh_gia) ? 'block' : 'none';
+
+            cancelBtn.onclick = () => cancelTrip(trip.id);
+            rateBtn.onclick = () => rateTrip(trip.id);
+        }
+
+        async function cancelTrip(tripId) {
+            if (!confirm('Bạn có chắc chắn muốn hủy chuyến đi này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/trips/${tripId}/cancel`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${dcApp.token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('success', 'Đã hủy chuyến đi thành công');
+                    loadTrips(currentPage);
+                    
+                    // Close modal if open
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('tripDetailModal'));
+                    if (modal) modal.hide();
+                } else {
+                    showAlert('error', result.message || 'Không thể hủy chuyến đi');
+                }
+            } catch (error) {
+                console.error('Cancel trip error:', error);
+                showAlert('error', 'Lỗi khi hủy chuyến đi');
+            }
+        }
+
+        async function rateTrip(tripId) {
+            // Guard: only customers (khach_hang) who own the trip can rate
+            if (!window.dcApp || !window.dcApp.user || window.dcApp.user.loai_tai_khoan !== 'khach_hang') {
+                showAlert('warning', 'Chỉ khách hàng mới được đánh giá chuyến đi');
+                return;
+            }
+            // Ensure the trip in current list belongs to the user (extra client-side safety)
+            const tripCard = [...document.querySelectorAll('.card.shadow-sm.mb-3')]
+                .find(el => el.innerHTML.includes(`#${tripId}`));
+            // (Optional: could fetch trip detail to verify ownership here)
+            document.getElementById('rating-trip-id').value = tripId;
+            document.getElementById('driver-rating').value = '5';
+            document.getElementById('review-comment').value = '';
+            
+            // Reset stars
+            document.querySelectorAll('.star').forEach(star => {
+                star.classList.remove('text-warning');
+                star.classList.add('text-muted');
+            });
+            
+            // Highlight first 5 stars
+            for (let i = 1; i <= 5; i++) {
+                document.querySelector(`[data-rating="${i}"]`).classList.remove('text-muted');
+                document.querySelector(`[data-rating="${i}"]`).classList.add('text-warning');
+            }
+
+            // Fetch trip detail to obtain driver info and render it in the modal
+            try {
+                const res = await fetch(`${API_BASE_URL}/trips/${tripId}`, {
+                    headers: { 'Authorization': `Bearer ${dcApp.token}` }
+                });
+                const result = await res.json();
+                if (result.success && result.data && result.data.tai_xe) {
+                    renderDriverInfoInRatingModal(result.data.tai_xe);
+                } else if (result.success && result.data && result.data.tai_xe_id) {
+                    // Fallback: request public driver data
+                    try {
+                        const drv = await fetch(`${API_BASE_URL}/drivers/public/${result.data.tai_xe_id}`);
+                        if (drv.ok) {
+                            const drvJson = await drv.json();
+                            if (drvJson && drvJson.success && drvJson.data) renderDriverInfoInRatingModal(drvJson.data);
+                        }
+                    } catch (e) { console.debug('driver public fetch failed', e); }
+                } else {
+                    // Clear summary if no driver
+                    renderDriverInfoInRatingModal(null);
+                }
+            } catch (e) {
+                console.debug('Failed to load trip for rating modal', e);
+                renderDriverInfoInRatingModal(null);
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('ratingModal'));
+            modal.show();
+        }
+
+        function setupRatingStars() {
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    document.getElementById('driver-rating').value = rating;
+                    
+                    // Update star display
+                    document.querySelectorAll('.star').forEach(s => {
+                        s.classList.remove('text-warning');
+                        s.classList.add('text-muted');
+                    });
+                    
+                    for (let i = 1; i <= rating; i++) {
+                        document.querySelector(`[data-rating="${i}"]`).classList.remove('text-muted');
+                        document.querySelector(`[data-rating="${i}"]`).classList.add('text-warning');
+                    }
+                });
+            });
+        }
+
+        async function submitRating() {
+            const tripId = document.getElementById('rating-trip-id').value;
+            const rating = document.getElementById('driver-rating').value;
+            const comment = document.getElementById('review-comment').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/reviews`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${dcApp.token}`
+                    },
+                    body: JSON.stringify({
+                        chuyen_di_id: tripId,
+                        diem_so: rating,
+                        nhan_xet: comment
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('success', 'Cảm ơn bạn đã đánh giá!');
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('ratingModal'));
+                    modal.hide();
+                    
+                    loadTrips(currentPage);
+                } else {
+                    showAlert('error', result.message || 'Không thể gửi đánh giá');
+                }
+            } catch (error) {
+                console.error('Submit rating error:', error);
+                showAlert('error', 'Lỗi khi gửi đánh giá');
+            }
+        }
+
+        // Render driver summary into the rating modal
+        function renderDriverInfoInRatingModal(driver) {
+            const container = document.getElementById('rating-driver-summary');
+            if (!container) return;
+            if (!driver) {
+                container.innerHTML = `<div class="text-muted small">Thông tin tài xế: N/A</div>`;
+                return;
+            }
+
+            const rating = Number(driver.diem_danh_gia || 0).toFixed(1);
+            const reviewCount = Number(driver.so_luot_danh_gia || 0);
+
+            container.innerHTML = `
+                <div class="card p-2" style="width:220px;">
+                    <div class="text-center">
+                        <i class="fas fa-user-circle fa-3x text-primary mb-2"></i>
+                        <div><strong>${driver.ten || driver.name || 'N/A'}</strong></div>
+                        <div class="small text-muted">${rating} ★ (${reviewCount} lượt)</div>
+                    </div>
+                    <hr>
+                    <div class="small">
+                        <div><i class="fas fa-car me-1"></i> ${driver.loai_xe || 'N/A'} - ${driver.so_cho_ngoi || 'N/A'} chỗ</div>
+                        <div><i class="fas fa-hashtag me-1"></i> ${driver.bien_so_xe || 'N/A'}</div>
+                        <div><i class="fas fa-industry me-1"></i> ${driver.hang_xe || 'N/A'}</div>
+                        <div><i class="fas fa-palette me-1"></i> ${driver.mau_xe || 'N/A'}</div>
+                        <div><i class="fas fa-clock me-1"></i> ${driver.kinh_nghiem_lien_tuc || 0} năm</div>
+                        <div><i class="fas fa-phone me-1"></i> ${driver.so_dien_thoai || 'N/A'}</div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+
+    <style>
+        .rating-stars .star {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .rating-stars .star:hover {
+            color: #ffc107 !important;
+        }
+        
+        .trip-route {
+            position: relative;
+        }
+        
+        .trip-route::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: linear-gradient(to bottom, #28a745, #dc3545);
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+        }
+    </style>
+</body>
+</html>

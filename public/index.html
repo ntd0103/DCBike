@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DC - Hệ thống đặt xe</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        /* Hide booking nav by default until app.js decides to show it for logged-in users */
+        #booking-nav { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-car"></i> DC Car Booking
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Trang chủ</a>
+                    </li>
+                    <li class="nav-item d-none" id="booking-nav">
+                        <a class="nav-link" href="views/booking.html" data-auth>Đặt xe</a>
+                    </li>
+                    <li class="nav-item" id="trips-nav">
+                        <a class="nav-link" href="views/trips.html" data-auth>Chuyến đi</a>
+                    </li>
+                    <li class="nav-item" id="drivers-nav">
+                        <a class="nav-link" href="views/drivers.html" data-auth>Tài xế</a>
+                    </li>
+                    <li class="nav-item" id="promos-nav">
+                        <a class="nav-link" href="views/promotions.html" data-auth>Khuyến mãi</a>
+                    </li>
+                    <li class="nav-item" id="driverreg-nav">
+                        <a class="nav-link" href="driver-registration.html">Đăng ký tài xế</a>
+                    </li>
+                    <li class="nav-item" id="auth-nav">
+                        <a class="nav-link" href="#" onclick="showAuthModal()">Đăng nhập</a>
+                    </li>
+                    <li class="nav-item d-none" id="user-nav">
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <span id="user-name"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="views/profile.html">Hồ sơ cá nhân</a></li>
+                                <li><a class="dropdown-item" href="views/trips.html">Chuyến đi của tôi</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="container">
+                <div class="row align-items-center min-vh-100">
+                    <div class="col-lg-6">
+                        <h1 class="display-4 fw-bold text-white mb-4">
+                            Đặt xe nhanh chóng, an toàn và tiện lợi
+                        </h1>
+                        <p class="lead text-light mb-4">
+                            DC Car Booking - Giải pháp di chuyển thông minh với công nghệ hiện đại
+                        </p>
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a href="views/booking.html" class="btn btn-warning btn-lg px-4" data-auth>
+                                <i class="fas fa-car"></i> Đặt xe ngay
+                            </a>
+                            <button id="signup-btn" class="btn btn-outline-light btn-lg px-4" onclick="showAuthModal()">
+                                <i class="fas fa-user-plus"></i> Đăng ký tài khoản
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="booking-card" id="booking-form" style="display: none;">
+                            <div class="card shadow-lg">
+                                <div class="card-header bg-warning">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-map-marker-alt"></i> Đặt chuyến đi
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="booking-form">
+                                        <div class="mb-3">
+                                            <label for="pickup-location" class="form-label">Điểm đón</label>
+                                            <input type="text" class="form-control" id="pickup-location" 
+                                                   placeholder="Nhập địa chỉ đón" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="destination" class="form-label">Điểm đến</label>
+                                            <input type="text" class="form-control" id="destination" 
+                                                   placeholder="Nhập địa chỉ đến" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="pickup-time" class="form-label">Thời gian đón</label>
+                                            <input type="datetime-local" class="form-control" id="pickup-time" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="vehicle-type" class="form-label">Loại xe</label>
+                                            <select class="form-select" id="vehicle-type" required>
+                                                <option value="">Chọn loại xe</option>
+                                                <option value="bike">Xe máy</option>
+                                                <option value="car">Ô tô 4 chỗ</option>
+                                                <option value="car_7">Ô tô 7 chỗ</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="notes" class="form-label">Ghi chú</label>
+                                            <textarea class="form-control" id="notes" rows="2" 
+                                                      placeholder="Ghi chú thêm (nếu có)"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-check"></i> Xác nhận đặt xe
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Dịch vụ của chúng tôi</h2>
+                    <p class="text-muted">Đa dạng loại xe và dịch vụ cho mọi nhu cầu di chuyển</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="service-card h-100">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <div class="service-icon mb-3">
+                                        <i class="fas fa-car fa-3x text-primary"></i>
+                                    </div>
+                                    <h5 class="card-title">Xe 4 chỗ</h5>
+                                    <p class="card-text text-muted">
+                                        Phù hợp cho gia đình nhỏ, đi làm hoặc đi chơi trong thành phố
+                                    </p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success"></i> Tiết kiệm chi phí</li>
+                                        <li><i class="fas fa-check text-success"></i> Linh hoạt di chuyển</li>
+                                        <li><i class="fas fa-check text-success"></i> Sạch sẽ, thoải mái</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="service-card h-100">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <div class="service-icon mb-3">
+                                        <i class="fas fa-users fa-3x text-success"></i>
+                                    </div>
+                                    <h5 class="card-title">Xe 7 chỗ</h5>
+                                    <p class="card-text text-muted">
+                                        Lý tưởng cho nhóm bạn, gia đình đông người hoặc chuyến đi xa
+                                    </p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success"></i> Rộng rãi thoải mái</li>
+                                        <li><i class="fas fa-check text-success"></i> Phù hợp nhóm đông</li>
+                                        <li><i class="fas fa-check text-success"></i> Hành lý nhiều</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="service-card h-100">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <div class="service-icon mb-3">
+                                        <i class="fas fa-crown fa-3x text-warning"></i>
+                                    </div>
+                                    <h5 class="card-title">Xe VIP</h5>
+                                    <p class="card-text text-muted">
+                                        Dịch vụ cao cấp với xe sang trọng cho các dịp đặc biệt
+                                    </p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success"></i> Xe sang trọng</li>
+                                        <li><i class="fas fa-check text-success"></i> Tài xế chuyên nghiệp</li>
+                                        <li><i class="fas fa-check text-success"></i> Dịch vụ hoàn hảo</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-5 bg-light">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h2 class="fw-bold mb-4">Về DC Car Booking</h2>
+                        <p class="lead mb-4">
+                            Chúng tôi cam kết mang đến dịch vụ đặt xe chất lượng cao với công nghệ hiện đại 
+                            và đội ngũ tài xế chuyên nghiệp.
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-shield-alt fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">An toàn</h6>
+                                        <small class="text-muted">Cam kết an toàn tuyệt đối</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-clock fa-2x text-success"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Nhanh chóng</h6>
+                                        <small class="text-muted">Phản hồi trong vòng 3 phút</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-dollar-sign fa-2x text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Giá cả hợp lý</h6>
+                                        <small class="text-muted">Minh bạch, không phí ẩn</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-heart fa-2x text-danger"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Tận tâm</h6>
+                                        <small class="text-muted">Phục vụ 24/7</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="text-center">
+                            <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                                 alt="DC Car Booking" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Trips Section -->
+        <section id="my-trips" class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-5">Chuyến đi của tôi</h2>
+                
+                <!-- Trip List -->
+                <div class="row" id="trips-list">
+                    <!-- Trip cards will be loaded here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-car"></i> DC Car Booking</h5>
+                    <p class="text-muted">Hệ thống đặt xe trực tuyến hàng đầu Việt Nam</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">© 2024 DC Car Booking. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Auth Modal -->
+    <div class="modal fade" id="authModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalTitle">Đăng nhập</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Login Form -->
+                    <form id="login-form" class="auth-form">
+                        <div class="mb-3">
+                            <label class="form-label">Email hoặc Số điện thoại</label>
+                            <input type="text" class="form-control" id="login-identifier" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mật khẩu</label>
+                            <input type="password" class="form-control" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="register-form" class="auth-form d-none">
+                        <div class="mb-3">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control" id="register-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Vai trò</label>
+                            <select class="form-select" id="register-role" required>
+                                <option value="khach_hang">Người dùng</option>
+                                <option value="tai_xe">Tài xế</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="register-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" id="register-phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mật khẩu</label>
+                            <input type="password" class="form-control" id="register-password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Xác nhận mật khẩu</label>
+                            <input type="password" class="form-control" id="register-confirm-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <p class="text-center w-100">
+                        <span id="auth-switch-text">Chưa có tài khoản?</span>
+                        <a href="#" id="auth-switch-link" onclick="toggleAuthForm()">Đăng ký ngay</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
