@@ -198,6 +198,10 @@ class Driver {
         LEFT JOIN nguoi_dung nd ON tx.nguoi_dung_id = nd.id
         WHERE tx.trang_thai_tai_xe = 'san_sang' 
           AND nd.trang_thai = 'hoat_dong'
+          -- Exclude drivers who already have an active trip (received or in-progress)
+          AND NOT EXISTS (
+            SELECT 1 FROM chuyen_di cd_active WHERE cd_active.tai_xe_id = tx.id AND cd_active.trang_thai IN ('da_nhan','dang_di')
+          )
           AND tx.vi_tri_hien_tai IS NOT NULL
         HAVING khoang_cach <= ?
         ORDER BY khoang_cach ASC
@@ -346,6 +350,10 @@ class Driver {
         INNER JOIN nguoi_dung nd ON tx.nguoi_dung_id = nd.id
         WHERE nd.trang_thai = 'hoat_dong' 
           AND nd.loai_tai_khoan = 'tai_xe'
+          -- Exclude drivers who currently have an active trip
+          AND NOT EXISTS (
+            SELECT 1 FROM chuyen_di cd_active WHERE cd_active.tai_xe_id = tx.id AND cd_active.trang_thai IN ('da_nhan','dang_di')
+          )
         ORDER BY tx.diem_danh_gia DESC, tx.so_luot_danh_gia DESC
         LIMIT 20
       `);

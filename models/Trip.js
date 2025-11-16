@@ -222,8 +222,15 @@ class Trip {
         values.push(additionalData.ly_do_huy);
       }
       
-      query += ' WHERE id = ?';
-      values.push(id);
+      // For some state transitions ensure we only change from an expected prior state to avoid races
+      if (trang_thai === 'da_nhan') {
+        // Only allow marking as 'da_nhan' when current state is 'cho_tai_xe'
+        query += " WHERE id = ? AND trang_thai = 'cho_tai_xe'";
+        values.push(id);
+      } else {
+        query += ' WHERE id = ?';
+        values.push(id);
+      }
       
       const [result] = await pool.execute(query, values);
       return result.affectedRows > 0;
@@ -259,6 +266,19 @@ class Trip {
       query += ' ORDER BY cd.created_at ASC';
       
       const [rows] = await pool.execute(query, params);
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Lấy các chuyến đang active của tài xế (đã nhận hoặc đang đi)
+  static async getActiveTripsByDriver(driverId) {
+    try {
+      const [rows] = await pool.execute(`
+        SELECT * FROM chuyen_di
+        WHERE tai_xe_id = ? AND trang_thai IN ('da_nhan', 'dang_di')
+      `, [driverId]);
       return rows;
     } catch (error) {
       throw error;

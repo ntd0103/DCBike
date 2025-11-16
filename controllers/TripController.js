@@ -1,6 +1,8 @@
 const Trip = require('../models/Trip');
 const Driver = require('../models/Driver');
 const Promotion = require('../models/Promotion');
+const QRCode = require('qrcode');
+const crypto = require('crypto');
 
 class TripController {
   // Tạo chuyến đi mới
@@ -80,10 +82,91 @@ class TripController {
           // If cash, mark as paid immediately; otherwise set to pending
           const status = method === 'tien_mat' ? 'da_thanh_toan' : 'cho_thanh_toan';
           const thoi_gian_thanh_toan = method === 'tien_mat' ? new Date() : null;
+
+          // generate transaction id for non-cash payments (and for traceability)
+          const ma_giao_dich = crypto.randomUUID ? crypto.randomUUID() : crypto.createHash('sha1').update(Date.now().toString() + Math.random().toString()).digest('hex');
+
           await pool.execute(`
-            INSERT INTO thanh_toan (chuyen_di_id, so_tien, phuong_thuc_thanh_toan, trang_thai, thoi_gian_thanh_toan)
-            VALUES (?, ?, ?, ?, ?)
-          `, [tripId, tripData.tong_tien || 0, method, status, thoi_gian_thanh_toan]);
+            INSERT INTO thanh_toan (chuyen_di_id, so_tien, phuong_thuc_thanh_toan, ma_giao_dich, trang_thai, thoi_gian_thanh_toan)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `, [tripId, tripData.tong_tien || 0, method, ma_giao_dich, status, thoi_gian_thanh_toan]);
+
+          // If bank transfer, generate a QR code payload and attach to responseData
+          if (method === 'chuyen_khoan') {
+            try {
+              // Build EMVCo / VNQR compliant payload (TLV format) and generate CRC16
+              // Helper to build TLV
+              function tlv(id, value) {
+                const len = value ? String(value.length).padStart(2, '0') : '00';
+                return `${id}${len}${value || ''}`;
+              }
+
+              // CRC16-CCITT (XModem) implementation
+              function crc16(buf) {
+                let crc = 0xFFFF;
+                for (let i = 0; i < buf.length; i++) {
+                  crc ^= buf.charCodeAt(i) << 8;
+                  for (let j = 0; j < 8; j++) {
+                    crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+                  }
+                }
+                return crc.toString(16).toUpperCase().padStart(4, '0');
+              }
+
+              // Build Merchant Account Information (Tag 26) for VNPAYQR
+              // Subfield 00 = GUI (VNPAYQR), 01 = merchant id/account, 02 = optional biller/store id
+              const gui = process.env.PAYMENT_VNQR_GUI || 'VNPAYQR';
+              const merchantId = process.env.PAYMENT_VNPAY_MERCHANT_ID || process.env.PAYMENT_BANK_ACCOUNT || '0123456789';
+              const billerId = process.env.PAYMENT_VNPAY_BILLER_ID || '';
+              let merchantAccountInfo = tlv('00', gui) + tlv('01', merchantId);
+              if (billerId) merchantAccountInfo += tlv('02', billerId);
+              const tag26 = tlv('26', merchantAccountInfo);
+
+              // Other tags
+              const payloadFormat = tlv('00', '01'); // version
+              const poi = tlv('01', '11'); // static QR (11) or dynamic (12). Use static by default
+              const mcc = tlv('52', '0000');
+              const currency = tlv('53', '704'); // VND
+              const amount = (Number(tripData.tong_tien) || 0).toFixed(2);
+              const amtTag = amount && Number(amount) > 0 ? tlv('54', amount) : '';
+              const country = tlv('58', 'VN');
+              const merchantName = tlv('59', (process.env.PAYMENT_MERCHANT_NAME || 'DC Car Booking').slice(0,25));
+              const merchantCity = tlv('60', (process.env.PAYMENT_MERCHANT_CITY || 'HCMC').slice(0,15));
+
+              // Additional data field template (Tag 62) with Reference (05)
+              const additionalData = tlv('05', ma_giao_dich);
+              const tag62 = tlv('62', additionalData);
+
+              // Compose payload without CRC (Tag 63)
+              let emvPayload = '';
+              emvPayload += payloadFormat;
+              emvPayload += poi;
+              emvPayload += tag26;
+              emvPayload += mcc;
+              emvPayload += currency;
+              if (amtTag) emvPayload += amtTag;
+              emvPayload += country;
+              emvPayload += merchantName;
+              emvPayload += merchantCity;
+              emvPayload += tag62;
+
+              // Append CRC tag placeholder
+              emvPayload += '63' + '04' + '0000';
+
+              const crc = crc16(emvPayload);
+              // Replace CRC placeholder
+              emvPayload = emvPayload.slice(0, -4) + crc;
+
+              // Generate QR image
+              const qrDataUrl = await QRCode.toDataURL(emvPayload, { margin: 2, width: 300 });
+
+              tripData._payment_qr = qrDataUrl;
+              tripData._payment_reference = ma_giao_dich;
+              tripData._payment_emv = emvPayload;
+            } catch (e) {
+              console.error('EMV QR generation failed:', e?.message || e);
+            }
+          }
         }
       } catch (e) {
         console.debug('Create payment record failed:', e?.message || e);
@@ -238,6 +321,15 @@ class TripController {
         });
       }
 
+      // Ensure driver has no other active trips (da_nhan or dang_di)
+      const activeTrips = await Trip.getActiveTripsByDriver(driver.id);
+      if (activeTrips && activeTrips.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Bạn đang có chuyến đang xử lý. Hoàn thành chuyến đó trước khi nhận chuyến mới.'
+        });
+      }
+
       // Lấy thông tin chuyến đi
       const trip = await Trip.findById(tripId);
       if (!trip) {
@@ -254,8 +346,13 @@ class TripController {
         });
       }
 
-      // Cập nhật chuyến đi và trạng thái tài xế
-      await Trip.updateStatus(tripId, 'da_nhan', { tai_xe_id: driver.id });
+      // Cập nhật chuyến đi atomically and check result to avoid double-accept
+      const updated = await Trip.updateStatus(tripId, 'da_nhan', { tai_xe_id: driver.id });
+      if (!updated) {
+        return res.status(400).json({ success: false, message: 'Chuyến đi đã được người khác nhận hoặc đã không còn hợp lệ.' });
+      }
+
+      // Now set driver status to 'dang_di'
       await Driver.updateStatus(driver.id, 'dang_di');
 
       res.json({
